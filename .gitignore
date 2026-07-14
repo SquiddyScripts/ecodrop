@@ -1,0 +1,27 @@
+# Local IDE / agent config (not part of the project)
+.claude/
+
+# Dependencies / builds
+node_modules/
+dist/
+.venv/
+__pycache__/
+*.pyc
+
+# Generated mega-assets (rebuild with elevator-viz/pack_meshes.py)
+meshes_packed.js
+
+# LaTeX intermediates
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+
+# OS noise
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Oversized source videos live in the Google Drive export, not in git
+competitions/videos/*_FULL_*.MOV

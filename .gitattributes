@@ -1,0 +1,21 @@
+# GitHub Pages site — documentation, not application source
+docs/index.html linguist-documentation
+docs/gallery.html linguist-documentation
+docs/assets/** linguist-documentation
+
+# Pre-built demo bundles (copied from interactive-demos/ npm run build)
+docs/lab/** linguist-generated
+
+# Binary / media — exclude from language statistics
+*.pdf linguist-generated
+*.png linguist-generated
+*.jpg linguist-generated
+*.jpeg linguist-generated
+*.heic linguist-generated
+*.stl linguist-generated
+*.blend linguist-generated
+*.mp4 linguist-generated
+*.mov linguist-generated
+*.MOV linguist-generated
+*.docx linguist-generated
+*.xlsx linguist-generated

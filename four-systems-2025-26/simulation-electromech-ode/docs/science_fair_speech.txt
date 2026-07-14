@@ -1,0 +1,49 @@
+================================================================================
+SCIENCE FAIR PRESENTATION — GRAVITY STORAGE SYSTEM COMPARISON
+(Short speech for judges: simulation, graphs, data analysis, conclusion)
+================================================================================
+
+--- INTRODUCTION (~30 sec) ---
+
+"Hi. I compared four round-trip gravity storage systems—ways to store energy by lifting a mass and then recovering electricity when it drops. The four are: dual-weight elevator, buoyancy gravity, electromagnetic—we used Halbach arrays as a component in that one—and variable counterweight. I used physics-based simulation so every system was tested under the same conditions: 3 meters height and 50 kilograms effective storage mass. My goal was to see which design gives the best round-trip efficiency and net energy recovery, and to support that with real data and statistics."
+
+
+--- HOW THE SIMULATION WAS CRAFTED (~1 min) ---
+
+"The simulation was programmed in MATLAB. I wrote scripts that implement each system’s physics—equations for motion, power, and energy over a full charge–discharge cycle—and then a comparison script that runs them all under the same conditions and does the statistics. So it’s all code: the models, the time integration, and the plotting. For the four-system comparison we use prescribed motion and energy integration so every design is treated the same way; we also built a more detailed electromechanical model that uses an ODE solver—that's a numerical integrator that steps the equations of motion through time when the dynamics are coupled, like mass and drum and motor all affecting each other—but the results we're presenting here come from the consistent comparison across all four systems.
+
+The simulation is built to be rigorous and fair. Each system is modeled with real physics: forces, velocities, and power. I didn’t just assume an efficiency number—I integrated mechanical power and applied motor and generator efficiencies so that generation on descent and consumption on ascent come from the same equations. We used replicates because in reality you’d build multiple versions of each system—or build the same system several times—and measure them; you’d get real-world randomness from manufacturing, wiring, and so on. We can’t do that in simulation, so we mimic it by running each system 10 times with small random changes in those efficiency parameters, plus or minus about 2%. So each of those 10 runs is like a slightly different “build” of the same design, and we get real uncertainty in the numbers instead of a single point estimate.
+
+For each of the four systems you get dedicated figures. The time-series figures show things like position and velocity over time, mechanical and electrical power, and how charge and discharge power change during the cycle. The energy-analysis figures show the one-cycle energy balance—how much was generated versus consumed—cumulative energy over the cycle, and round-trip efficiency. So every graph is tied to a specific system and a specific part of the physics: either how it moves and uses power over time, or how the energy adds up and how efficient the cycle is.
+
+The comparison figure brings all four systems together. Panel A is a bar chart of round-trip efficiency for each system, with error bars from those 10 runs and the mean value labeled on each bar. Panel B is the same idea for net energy per cycle—how much more you generate than you consume; negative means the system uses more than it gives back, which is what we expect. Panel C is the statistical summary: the ANOVA results for both metrics. Panel D is a short conclusion panel that states the best system for efficiency and for net recovery and shows the full ranking."
+
+
+--- DATA ANALYSIS AND WHAT IT MEANS (~45 sec) ---
+
+"The data analysis is built on those 10 runs per system. For each run we get one round-trip efficiency and one net energy per cycle. So we have 40 numbers for efficiency and 40 for net energy—10 per system.
+
+The ANOVA is basically asking: could the differences between the four systems just be luck—random variation—or are they real? We compare how much the numbers differ between the four systems versus how much they bounce around within each system. If the between-system spread is big compared to the within-system spread, we get a small p-value. Here p is less than 0.001 for both efficiency and net energy, so the chance that we’d see differences this big by luck is basically zero. We also looked at eta-squared: that’s like asking, of all the spread in the numbers, how much is explained by which system it is? It’s about a third for both metrics—so system type really does matter. In plain terms: the four designs don’t all perform the same; the differences we see are real, not noise.
+
+The bar charts show that directly: Variable counterweight has the highest mean efficiency and the best net recovery, and the error bars don’t overlap with the others in the same way, which fits with the ANOVA. So the data analysis tells us both that there are real differences and which system comes out on top under these conditions."
+
+
+--- CONCLUSION (~30 sec) ---
+
+"The conclusion from the simulation and data is that under 3 meters and 50 kilograms, the variable counterweight system performed best: highest round-trip efficiency, around 90%, and the best net energy recovery. The ranking was variable counterweight, then dual-weight elevator, then buoyancy, then electromagnetic. That order makes sense physically: systems that reduce the net work the motor does—like matching a counterweight to the descending mass—need less electrical input per cycle, so more shows up as net recovery. The variable counterweight does that by adjusting the counterweight during the cycle; the dual-weight uses a fixed counterweight, so it’s good but not as optimized; buoyancy and the electromagnetic system have extra losses from pumping, multiple stages, or auxiliary power.
+
+So my recommendation is that for maximum efficiency and best net recovery under these test conditions, the variable counterweight is the preferred design among the four. I’d also note that these are simplified physics models—real prototypes or more detailed simulation would strengthen the conclusions. Thank you."
+
+
+================================================================================
+Total: about 2.5–3 minutes. Adjust pacing or add a one-sentence hook at the start if needed.
+================================================================================
+
+--- NOTE: ODE SOLVER (for your reference) ---
+
+Where it's used: The ODE solver appears in main_simulation.m, which models a single electromechanical system (drum, sprocket, gearbox, motor, electrical load). The four-system comparison (dual-weight, buoyancy, electromagnetic, variable counterweight) does NOT call that—it uses prescribed velocity profiles and numerical integration of power (e.g. trapz) to get energy. So the speech is about the comparison; the ODE is an extra, more detailed part of the project.
+
+Why use an ODE solver: In the drum/motor system, the state—angle, angular velocity, motor speed, maybe current—evolves according to coupled differential equations. The rate of change of each variable depends on the others and on the physics (torque balance, motor back-EMF, load). You can't write position as a simple formula in time; you have to integrate the equations step-by-step. MATLAB's ode45 (or ode15s, ode23s) does that: given initial conditions and the derivative function, it advances the state through time. So we use an ODE solver when the dynamics are truly coupled and we need the full time evolution; we use prescribed motion when we want a fair, consistent comparison and the motion is defined by the design (e.g. lift phase, drop phase, dock phase).
+
+If you prefer not to mention the ODE in the speech, you can delete the sentence that starts "For the four-system comparison we use prescribed motion..." and end with "...the models, the time integration, and the plotting."
+================================================================================

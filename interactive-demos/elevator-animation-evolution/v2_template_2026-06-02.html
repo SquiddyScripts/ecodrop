@@ -1,0 +1,1092 @@
+<meta charset="utf-8">
+<title>Dual-Weight Regeneration Elevator — Detailed Mechanism</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0c0f14;--panel:rgba(18,23,31,.82);--line:#1f2733;--ink:#cdd6e0;
+    --dim:#7d8a9b;--cyan:#57d1e6;--amber:#e0a13a;--green:#5be08a}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);
+    font-family:'JetBrains Mono',monospace;overflow:hidden}
+  #app{position:fixed;inset:0}canvas{display:block}
+  .panel{position:absolute;background:var(--panel);border:1px solid var(--line);
+    border-radius:10px;backdrop-filter:blur(8px);box-shadow:0 10px 40px rgba(0,0,0,.5)}
+  #title{top:16px;left:16px;padding:14px 18px;max-width:340px}
+  #title h1{margin:0;font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:18px;
+    letter-spacing:.04em;color:#fff;line-height:1.15}
+  #title .sub{margin-top:5px;font-size:11px;color:var(--dim)}
+  #title .who{margin-top:8px;font-size:10.5px;color:var(--cyan)}
+  #state{margin-top:11px;display:flex;align-items:center;gap:9px;font-size:12px}
+  #dot{width:11px;height:11px;border-radius:50%;background:var(--dim)}
+  #dot.on{background:var(--green);animation:pulse 1.4s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 8px 2px rgba(91,224,138,.5)}50%{box-shadow:0 0 18px 5px rgba(91,224,138,.9)}}
+  #data{top:16px;right:16px;padding:13px 15px;width:236px}
+  #data h2{margin:0 0 8px;font-family:'Chakra Petch',sans-serif;font-size:12px;
+    letter-spacing:.12em;color:var(--cyan);text-transform:uppercase}
+  #data .row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;
+    border-bottom:1px dashed var(--line)}#data .row:last-child{border-bottom:none}
+  #data .k{color:var(--dim)}.v{font-weight:600}.v.g{color:var(--green)}.v.a{color:var(--amber)}.v.c{color:var(--cyan)}
+  #ctrl{bottom:16px;left:50%;transform:translateX(-50%);padding:10px 14px;display:flex;
+    align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;max-width:94vw}
+  button{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--ink);
+    background:#161c25;border:1px solid var(--line);border-radius:7px;padding:7px 11px;cursor:pointer;transition:.15s}
+  button:hover{border-color:var(--cyan);color:#fff}button.act{border-color:var(--cyan);color:var(--cyan)}
+  .grp{display:flex;gap:6px;align-items:center}
+  .lbl{font-size:10px;color:var(--dim);letter-spacing:.08em;text-transform:uppercase}
+  input[type=range]{accent-color:var(--cyan);width:90px}.sep{width:1px;height:26px;background:var(--line)}
+  .tag{position:absolute;transform:translate(-50%,-130%);pointer-events:none;font-size:10.5px;
+    color:#fff;background:rgba(10,14,20,.72);border:1px solid var(--line);border-left:2px solid var(--cyan);
+    padding:2px 7px;border-radius:4px;white-space:nowrap;transition:opacity .2s}
+  .tag.amber{border-left-color:var(--amber)}.tag.green{border-left-color:var(--green)}
+  #hint{position:absolute;bottom:74px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--dim)}
+  #load{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);
+    z-index:50;flex-direction:column;gap:14px}
+  #load .ring{width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--cyan);
+    border-radius:50%;animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+  #load .t{font-size:11px;color:var(--dim);letter-spacing:.1em}
+  @media(max-width:680px){#data{display:none}}
+</style>
+<div id="app"></div>
+<div id="load"><div class="ring"></div><div class="t">BUILDING MECHANISM…</div></div>
+
+<div id="tabbar" style="position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:30;
+  background:rgba(13,20,28,.85);border:1px solid var(--line);border-radius:8px;padding:4px;display:flex;gap:2px;
+  backdrop-filter:blur(8px)">
+  <button class="tab act" data-tab="t1" style="font-family:'Chakra Petch',sans-serif;font-size:11px;letter-spacing:.1em;
+    padding:8px 16px;background:transparent;border:none;color:var(--ink);border-radius:5px;cursor:pointer;text-transform:uppercase">Dual-Weight System</button>
+  <button class="tab" data-tab="t2" style="font-family:'Chakra Petch',sans-serif;font-size:11px;letter-spacing:.1em;
+    padding:8px 16px;background:transparent;border:none;color:var(--dim);border-radius:5px;cursor:pointer;text-transform:uppercase">Variable Counterweight</button>
+</div>
+<style>
+  .tab.act{background:var(--cyan)!important;color:#0a1218!important;font-weight:600}
+  .tab:not(.act):hover{background:rgba(87,209,230,.12);color:var(--ink)}
+  #title{margin-top:54px}
+</style>
+
+<div id="title" class="panel">
+  <h1 id="titleH">Dual-Weight Regeneration Elevator</h1>
+  <div class="sub" id="titleSub">Real gearbox geometry · dual-drum hoist · live regeneration</div>
+  <div class="who">Amaan · Aiman · Kavin</div>
+  <div id="state"><span id="dot"></span><span id="stateTxt">initializing…</span></div>
+</div>
+<div id="data" class="panel">
+  <h2>Live Telemetry</h2>
+  <div class="row"><span class="k">Descending mass</span><span class="v c" id="d_mass">—</span></div>
+  <div class="row"><span class="k">Car velocity</span><span class="v" id="d_vel">—</span></div>
+  <div class="row"><span class="k">Drum / rod</span><span class="v" id="d_drum">—</span></div>
+  <div class="row"><span class="k">Gear stage (×4)</span><span class="v a" id="d_gear">—</span></div>
+  <div class="row"><span class="k">Regen output</span><span class="v g" id="d_pow">—</span></div>
+  <div class="row"><span class="k">Cycle</span><span class="v" id="d_cyc">—</span></div>
+</div>
+
+<div id="data2" class="panel" style="display:none">
+  <h2>Variable Counterweight</h2>
+  <div class="row"><span class="k">Passengers</span><span class="v c" id="d2_pax">0</span></div>
+  <div class="row"><span class="k">Car load</span><span class="v" id="d2_load">— kg</span></div>
+  <div class="row"><span class="k">Counterweight target</span><span class="v a" id="d2_target">— kg</span></div>
+  <div class="row"><span class="k">Active barbells</span><span class="v" id="d2_n">0</span></div>
+  <div class="row"><span class="k">Status</span><span class="v g" id="d2_status">idle</span></div>
+  <div class="row"><span class="k">Energy harvested</span><span class="v g" id="d2_egy">0.00 Wh</span></div>
+</div>
+<div id="hint">drag to orbit · scroll to zoom · shift-drag to pan · try the “Mechanism” view</div>
+<div id="ctrl" class="panel">
+  <div class="grp"><button id="play" class="act">❚❚ Pause</button></div><div class="sep"></div>
+  <div class="grp"><span class="lbl">Speed</span><input id="speed" type="range" min="0.1" max="2.5" step="0.1" value="1"></div>
+  <div class="sep"></div>
+  <div class="grp"><span class="lbl">View</span>
+    <button data-cam="over" class="act">Overview</button>
+    <button data-cam="mech">Mechanism</button>
+    <button data-cam="gears">Gear train</button>
+    <button data-cam="car">Car</button>
+    <button data-cam="cw">C-weight</button></div>
+  <div class="sep"></div>
+  <div class="grp"><button id="labels" class="act">Labels</button>
+    <button id="cut">Cutaway</button><button id="orbit">Auto-orbit</button>
+    <button id="ui">Hide UI&nbsp;(H)</button>
+    <button id="edit">Edit&nbsp;(E)</button></div>
+</div>
+
+<div id="ctrl2" class="panel" style="display:none">
+  <div class="grp"><button id="play2" class="act">❚❚ Pause</button></div><div class="sep"></div>
+  <div class="grp"><span class="lbl">Passengers</span>
+    <button id="paxDown" style="width:28px">−</button>
+    <span id="paxVal" style="font-family:'Chakra Petch',sans-serif;color:var(--cyan);font-size:14px;min-width:18px;text-align:center;display:inline-block">0</span>
+    <button id="paxUp" style="width:28px">+</button></div>
+  <div class="sep"></div>
+  <div class="grp"><span class="lbl">View</span>
+    <button data-cam2="over" class="act">Overview</button>
+    <button data-cam2="cwt">Counterweight</button>
+    <button data-cam2="rotary">Rotary station</button>
+    <button data-cam2="cab">Cab</button>
+    <button data-cam2="cross">Cross-section</button></div>
+  <div class="sep"></div>
+  <div class="grp"><button id="labels2" class="act">Labels</button>
+    <button id="orbit2">Auto-orbit</button>
+    <button id="ui2">Hide UI&nbsp;(H)</button></div>
+</div>
+
+<div id="editPanel" class="panel" style="display:none;top:130px;left:16px;padding:13px 15px;width:280px">
+  <h2 style="margin:0 0 8px;font-family:'Chakra Petch',sans-serif;font-size:12px;letter-spacing:.12em;color:var(--cyan);text-transform:uppercase">Edit Mode</h2>
+  <div style="font-size:10.5px;color:var(--dim);line-height:1.5;margin-bottom:8px">
+    Click a part to select. Drag to move on the ground plane (X/Z).<br>
+    Hold <b>shift</b>+drag for up/down (Y). Arrow keys nudge.<br>
+    <b>1</b>/<b>2</b>/<b>3</b> = rotate X/Y/Z by 15°. <b>R</b> resets rotation. <b>Esc</b> deselects.
+  </div>
+  <div id="editSel" style="font-size:11px;color:var(--ink);padding:6px 8px;background:#0d141c;border-radius:4px;margin-bottom:8px;min-height:18px">(nothing selected)</div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap">
+    <button id="editPrint">Print coords</button>
+    <button id="editStep">Step: 5cm</button>
+  </div>
+  <pre id="editOut" style="font-size:10.5px;color:#9aa;background:#0a0f15;padding:8px;border-radius:4px;margin-top:8px;max-height:180px;overflow:auto;display:none;white-space:pre-wrap;word-break:break-all"></pre>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const GBOX_PACKED="__GBOX_PACKED__";
+const VARCWT_PACKED="__VARCWT_PACKED__";
+const C={H:9.5,carW:1.30,carH:2.10,carD:1.30,carZ:0.10,
+  carMid:4.3,cwMid:4.3,travel:2.6,
+  rDrum:0.34,drumY:8.95,bedTop:8.78,railTopY:8.55,
+  cwZ:-0.82,                                   // counterweight behind the car
+  carDrumZ:0.42, cwDrumZ:-0.65,                // drums separated front/back
+  gboxScale:2.2,                                // gearbox scale (positions computed in buildUnit)
+  carRopeX:0.20, cwRopeX:-0.20, ratio:4};
+
+const app=document.getElementById('app');
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.outputEncoding=THREE.sRGBEncoding;app.appendChild(renderer.domElement);
+const scene=new THREE.Scene();scene.background=new THREE.Color('#0c0f14');
+scene.fog=new THREE.Fog('#0c0f14',18,46);
+const camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,0.03,200);
+scene.add(new THREE.HemisphereLight('#cfe3ff','#0a0d12',0.55));
+const key=new THREE.DirectionalLight('#fff4e0',1.3);key.position.set(7,14,9);key.castShadow=true;
+key.shadow.mapSize.set(2048,2048);key.shadow.camera.near=1;key.shadow.camera.far=44;
+key.shadow.camera.left=-10;key.shadow.camera.right=10;key.shadow.camera.top=13;key.shadow.camera.bottom=-2;
+key.shadow.bias=-0.0004;scene.add(key);
+const fill=new THREE.DirectionalLight('#5d7fbf',0.5);fill.position.set(-8,6,-6);scene.add(fill);
+const rim=new THREE.DirectionalLight('#8fe6ff',0.4);rim.position.set(-3,9,8);scene.add(rim);
+const grid=new THREE.GridHelper(44,44,0x1f3140,0x14202b);scene.add(grid);
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(44,44),
+  new THREE.MeshStandardMaterial({color:0x0a0d12,roughness:1}));
+floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;floor.position.y=-0.01;scene.add(floor);
+
+const M={
+  steel:new THREE.MeshStandardMaterial({color:0x6f7884,metalness:.85,roughness:.45}),
+  steelDk:new THREE.MeshStandardMaterial({color:0x3d454f,metalness:.8,roughness:.5}),
+  rail:new THREE.MeshStandardMaterial({color:0xb6bdc6,metalness:.9,roughness:.3}),
+  car:new THREE.MeshStandardMaterial({color:0xc9d1da,metalness:.55,roughness:.4}),
+  carDoor:new THREE.MeshStandardMaterial({color:0x2c5f73,metalness:.6,roughness:.45}),
+  cw:new THREE.MeshStandardMaterial({color:0x4a525c,metalness:.8,roughness:.5}),
+  cwPlate:new THREE.MeshStandardMaterial({color:0x5b646f,metalness:.85,roughness:.4}),
+  drum:new THREE.MeshStandardMaterial({color:0x6b7480,metalness:.9,roughness:.35}),
+  rope:new THREE.MeshStandardMaterial({color:0x9aa2ac,metalness:.7,roughness:.4}),
+  bead:new THREE.MeshStandardMaterial({color:0x57d1e6,emissive:0x0e3a44,roughness:.4}),
+  housing:new THREE.MeshStandardMaterial({color:0x95a7ba,metalness:.7,roughness:.42}),
+  mount:new THREE.MeshStandardMaterial({color:0x55606c,metalness:.8,roughness:.45}),
+  gearA:new THREE.MeshStandardMaterial({color:0xe0a13a,metalness:.92,roughness:.28,emissive:0x2a1700,emissiveIntensity:0}),
+  gearB:new THREE.MeshStandardMaterial({color:0xb9c2cc,metalness:.92,roughness:.3,emissive:0x10202a,emissiveIntensity:0}),
+  gearC:new THREE.MeshStandardMaterial({color:0xcf9233,metalness:.92,roughness:.3,emissive:0x2a1700,emissiveIntensity:0}),
+  coupling:new THREE.MeshStandardMaterial({color:0x8f99a4,metalness:.9,roughness:.3}),
+  gen:new THREE.MeshStandardMaterial({color:0x2f6b3d,metalness:.6,roughness:.45,emissive:0x16e06a,emissiveIntensity:0.15}),
+};
+function box(w,h,d,m,x=0,y=0,z=0){const g=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);
+  g.position.set(x,y,z);g.castShadow=true;g.receiveShadow=true;return g;}
+
+// bevel gear: truncated cone + radial teeth, spins about its LOCAL +Y
+function makeBevel(teeth,R,mat){
+  const spin=new THREE.Group();
+  const h=R*0.85;
+  const body=new THREE.Mesh(new THREE.CylinderGeometry(R*0.40,R,h,Math.max(20,teeth)),mat);
+  body.castShadow=true; spin.add(body);
+  const hub=new THREE.Mesh(new THREE.CylinderGeometry(R*0.16,R*0.16,h*1.5,18),M.steelDk);
+  spin.add(hub);
+  for(let i=0;i<teeth;i++){
+    const a=i/teeth*Math.PI*2;
+    const t=new THREE.Mesh(new THREE.BoxGeometry(R*0.13,h*0.55,R*0.22),mat);
+    t.position.set(Math.cos(a)*R*0.92,-h*0.10,Math.sin(a)*R*0.92);
+    t.rotation.y=-a; t.rotation.x=0.45;          // tilt teeth onto the cone face
+    t.castShadow=true; spin.add(t);
+  }
+  return spin;     // caller wraps + orients; animate spin.rotation.y
+}
+// wrap a bevel so its axis aligns to 'x' | 'y' | 'z', placed at p
+function mountBevel(spin,axis,p){
+  const w=new THREE.Group();
+  if(axis==='x')w.rotation.z=-Math.PI/2;
+  else if(axis==='z')w.rotation.x=Math.PI/2;
+  w.position.set(p[0],p[1],p[2]); w.add(spin); return w;
+}
+
+// ---------- decode packed gearbox bodies ----------
+function b64ToBuf(b){const s=atob(b),u=new Uint8Array(s.length);
+  for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u.buffer;}
+function parsePacked(buf){
+  const dv=new DataView(buf);let o=0;const n=dv.getUint32(o,true);o+=4;const parts=[];
+  for(let i=0;i<n;i++){
+    const grp=dv.getUint8(o);o+=1;const ax=dv.getUint8(o);o+=1;
+    const cx=dv.getFloat32(o,true),cy=dv.getFloat32(o+4,true),cz=dv.getFloat32(o+8,true);o+=12;
+    const nv=dv.getUint32(o,true);o+=4;
+    const slice=buf.slice(o,o+nv*12);o+=nv*12;
+    const pos=new Float32Array(slice);
+    parts.push({grp,ax,cen:[cx,cy,cz],pos});
+  }return parts;}
+const GPARTS=parsePacked(b64ToBuf(GBOX_PACKED));
+
+// Decoder for the new (named) packed STL format used by tab 2.
+// Layout: { u16 nameLen, name[nameLen], 3*float32 bmin, 3*float32 bmax, u32 nFaces, nFaces*3*float32 pos } until nameLen==0
+function parseNamedPacked(buf){
+  const dv=new DataView(buf); const dec=new TextDecoder(); let o=0; const out={};
+  while(o<buf.byteLength){
+    const ln=dv.getUint16(o,true); o+=2;
+    if(ln===0) break;
+    const name=dec.decode(new Uint8Array(buf,o,ln)); o+=ln;
+    const bmin=[dv.getFloat32(o,true),dv.getFloat32(o+4,true),dv.getFloat32(o+8,true)]; o+=12;
+    const bmax=[dv.getFloat32(o,true),dv.getFloat32(o+4,true),dv.getFloat32(o+8,true)]; o+=12;
+    const nf=dv.getUint32(o,true); o+=4;
+    const pos=new Float32Array(buf.slice(o,o+nf*36)); o+=nf*36;
+    out[name]={bmin,bmax,pos,nf};
+  }
+  return out;
+}
+const VCWT_PARTS=parseNamedPacked(b64ToBuf(VARCWT_PACKED));
+function makeMeshFromPart(part, material){
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(part.pos, 3));
+  g.computeVertexNormals();
+  const m=new THREE.Mesh(g, material);
+  m.castShadow=true; m.receiveShadow=true;
+  return m;
+}
+
+// ============================================================
+//  ELEVATOR STRUCTURE  (unchanged core — this part you liked)
+// ============================================================
+const t1Root=new THREE.Group();scene.add(t1Root);
+const t2Root=new THREE.Group();scene.add(t2Root); t2Root.visible=false;
+const root=t1Root;   // alias so all existing code keeps working for tab 1
+const shaftFront=new THREE.Group();root.add(shaftFront);
+const halfW=1.05,halfD=0.95;
+[[halfW,halfD],[-halfW,halfD],[halfW,-halfD],[-halfW,-halfD]].forEach(([x,z])=>{
+  (z>0?shaftFront:root).add(box(0.10,C.H,0.10,M.steelDk,x,C.H/2,z));});
+for(let y=0;y<=C.H+0.01;y+=C.H/4){
+  root.add(box(2*halfW+0.1,0.08,0.08,M.steelDk,0,y,-halfD));
+  shaftFront.add(box(2*halfW+0.1,0.08,0.08,M.steelDk,0,y,halfD));
+  root.add(box(0.08,0.08,2*halfD,M.steelDk,-halfW,y,0));
+  root.add(box(0.08,0.08,2*halfD,M.steelDk,halfW,y,0));}
+const carRailX=0.92,cwRailX=0.46, RH=C.railTopY, RY=C.railTopY/2;
+[carRailX,-carRailX].forEach(x=>{root.add(box(0.07,RH,0.16,M.rail,x,RY,C.carZ));
+  root.add(box(0.16,RH,0.05,M.rail,x,RY,C.carZ));});
+[0.46,-0.46].forEach(x=>root.add(box(0.05,RH,0.12,M.rail,x,RY,C.cwZ)));
+
+// ---- car ----
+const car=new THREE.Group();root.add(car);
+car.add(box(C.carW+0.24,0.14,0.14,M.steelDk,0,C.carH/2+0.18,C.carZ));
+car.add(box(C.carW+0.24,0.14,0.14,M.steelDk,0,-C.carH/2-0.12,C.carZ));
+[(C.carW/2+0.12),-(C.carW/2+0.12)].forEach(x=>car.add(box(0.12,C.carH+0.5,0.12,M.steelDk,x,0,C.carZ)));
+car.add(box(0.16,0.16,C.carDrumZ-C.carZ+0.1,M.steelDk,C.carRopeX,C.carH/2+0.30,(C.carZ+C.carDrumZ)/2)); // hitch arm
+car.add(box(C.carW,C.carH,C.carD,M.car,0,0,C.carZ));
+car.add(box(C.carW+0.06,0.07,C.carD+0.06,M.steel,0,C.carH/2,C.carZ));
+car.add(box(C.carW+0.06,0.07,C.carD+0.06,M.steel,0,-C.carH/2,C.carZ));
+for(let i=0;i<7;i++)car.add(box(C.carW*0.9,0.24,0.03,M.carDoor,0,-0.9+i*0.30,C.carZ+C.carD/2+0.02));
+
+// ---- counterweight (runs behind the car so they pass without touching) ----
+const cw=new THREE.Group();root.add(cw);
+cw.add(box(0.92,1.9,0.06,M.cw,0,0,C.cwZ-0.09));
+[0.45,-0.45].forEach(x=>cw.add(box(0.06,1.9,0.20,M.cw,x,0,C.cwZ)));
+for(let i=0;i<9;i++)cw.add(box(0.84,0.17,0.18,M.cwPlate,0,-0.78+i*0.19,C.cwZ));
+// top hitch — arm reaching from cw body to the cw drum's z-plane
+cw.add(box(0.16,0.16,Math.abs(C.cwZ-C.cwDrumZ)+0.1,M.steelDk,C.cwRopeX,1.0,(C.cwZ+C.cwDrumZ)/2));
+
+// ============================================================
+//  MACHINE — the actual invention
+// ============================================================
+const mach=new THREE.Group();root.add(mach);
+// === MECHANISM ENABLED ===
+const SHOW_MECH=true;
+mach.visible=SHOW_MECH;
+// bedplate + ribs
+mach.add(box(3.4,0.16,1.7,M.steel,0,C.bedTop-0.08,0));
+for(let x=-1.6;x<=1.6;x+=0.5)mach.add(box(0.06,0.16,1.5,M.steelDk,x,C.bedTop-0.08,0));
+
+// ---- gearbox UNIT: hangs vertically below each drum, driven via bevel on axle stub ----
+const SHOW_GEARBOX=true;
+const grpMat={0:M.mount,1:M.gearA,2:M.gearB,3:M.gearC,4:M.coupling};
+const AX=['x','y','z'];
+const allSpin=[];
+const bevels=[];
+// M_cw: (x,y,z)->(-x,z,y) — gearbox horizontal beside CW drum, motor extends -X
+// M_up: (x,y,z)->(x,z,-y) — gearbox horizontal beside CAR drum, motor extends +X
+const M_cw=new THREE.Matrix4().set(-1,0,0,0, 0,0,1,0, 0,1,0,0, 0,0,0,1);
+const M_up=new THREE.Matrix4().set( 1,0,0,0, 0,0,1,0, 0,-1,0,0, 0,0,0,1);
+
+function buildUnit(drumX,drumZ,side,mtx){
+  // side: -1 = CW (stub extends -X), +1 = CAR (stub extends +X)
+  const bevelX = drumX + side*0.55;            // bevel sits past the drum edge
+  const bevelPos=[bevelX, C.drumY, drumZ];
+  // axle stub from drum edge to the bevel
+  const stubLen = 0.38;
+  const stub=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,stubLen,14),M.steelDk);
+  stub.rotation.z=Math.PI/2;
+  stub.position.set(drumX + side*(0.17 + stubLen/2), C.drumY, drumZ);
+  stub.castShadow=true; mach.add(stub);
+  // bevel A on axle stub (axis X)
+  const bevA=makeBevel(15,0.062,M.gearC);
+  const bevAW=mountBevel(bevA,'x',bevelPos); mach.add(bevAW);
+  // bevel B on gearbox input shaft (axis Z, perpendicular to A) — co-located with A
+  const bevB=makeBevel(15,0.062,M.gearA);
+  const bevBW=mountBevel(bevB,'z',[bevelPos[0],bevelPos[1]-0.05,bevelPos[2]]); mach.add(bevBW);
+  bevels.push({bevA,bevB});
+  // gearbox placement: BULL GEAR (biggest gear, middle shaft, local x≈0) lands at bevel.
+  // This centers the housing on the bevel so the bevel sits in the middle, not at the edge.
+  // Bull gear local centroid ≈ (0, 0, 0.064); world offset = (0, 0.141, 0) for both rotations.
+  const s=C.gboxScale;
+  const gpos=[
+    bevelPos[0],                  // bull gear local x=0 → world_x = gpos_x = bevelX
+    bevelPos[1]-0.064*s,          // bull gear world_y above gpos by 0.141 → at drum height
+    bevelPos[2]                   // bull gear local z=0 in shaft direction
+  ];
+  const gbox=new THREE.Group();
+  gbox.quaternion.setFromRotationMatrix(mtx);
+  gbox.position.set(gpos[0],gpos[1],gpos[2]);
+  gbox.scale.setScalar(s);
+  gbox.visible=SHOW_GEARBOX; mach.add(gbox);
+  GPARTS.forEach(p=>{
+    const g=new THREE.BufferGeometry();
+    g.setAttribute('position',new THREE.BufferAttribute(p.pos,3)); g.computeVertexNormals();
+    const isHousing=(p.grp===0 && p.pos.length>6000);
+    const mesh=new THREE.Mesh(g,isHousing?M.housing:grpMat[p.grp]);
+    mesh.castShadow=true;mesh.receiveShadow=true;
+    mesh.position.set(p.cen[0],p.cen[1],p.cen[2]); gbox.add(mesh);
+    if(p.grp!==0)allSpin.push({mesh,axis:AX[p.ax],grp:p.grp});
+  });
+  // generator at the motor end — aligned to the motor pinion at local (0.148,-0.077,0.064)
+  const genG=new THREE.Group();
+  const gb=new THREE.Mesh(new THREE.CylinderGeometry(0.038,0.038,0.12,20),M.gen);
+  gb.rotation.z=Math.PI/2; gb.castShadow=true; genG.add(gb);
+  genG.add(box(0.07,0.07,0.07,M.gen,0.075,0,0));
+  genG.position.set(0.22,-0.077,0.064); gbox.add(genG);
+  // Tag editable groups for edit mode
+  const tag=side<0?'CW':'CAR';
+  gbox.userData.editName=tag+' gearbox';
+  stub.userData.editName=tag+' axle stub';
+  // bevel pair group: we wrap them so a single click selects both
+  return {stub,gbox,bevAW,bevBW,bevA,bevB,genG,tag};
+}
+const unitCW =buildUnit(C.cwRopeX,  C.cwDrumZ,  -1, M_cw);
+const unitCar=buildUnit(C.carRopeX, C.carDrumZ,  1, M_up);
+// names for the remaining editable bits (wrappers, since spin groups are inside)
+unitCW.bevAW.userData.editName='CW bevel A (on stub)';
+unitCW.bevBW.userData.editName='CW bevel B (on gearbox)';
+unitCW.genG.userData.editName='CW generator';
+unitCar.bevAW.userData.editName='CAR bevel A (on stub)';
+unitCar.bevBW.userData.editName='CAR bevel B (on gearbox)';
+unitCar.genG.userData.editName='CAR generator';
+const gen=new THREE.Group();gen.visible=false;
+
+
+// ---- hoist drums, split front-to-back (stubs are built inside buildUnit) ----
+const hoist=new THREE.Group();mach.add(hoist);
+function makeDrum(x,z){
+  const d=new THREE.Group();d.position.set(x,C.drumY,z);
+  const body=new THREE.Mesh(new THREE.CylinderGeometry(C.rDrum,C.rDrum,0.34,32),M.drum);
+  body.rotation.z=Math.PI/2;body.castShadow=true;d.add(body);
+  [0.17,-0.17].forEach(fx=>{const fl=new THREE.Mesh(
+    new THREE.CylinderGeometry(C.rDrum*1.12,C.rDrum*1.12,0.03,32),M.steelDk);
+    fl.rotation.z=Math.PI/2;fl.position.x=fx;d.add(fl);});
+  for(let i=0;i<10;i++){const r=new THREE.Mesh(new THREE.TorusGeometry(C.rDrum+0.005,0.006,6,28),M.steelDk);
+    r.rotation.y=Math.PI/2;r.position.x=-0.15+i*0.033;d.add(r);}
+  hoist.add(d);return d;}
+const drumCar=makeDrum(C.carRopeX,C.carDrumZ); drumCar.userData.editName='CAR drum';
+const drumCw =makeDrum(C.cwRopeX,C.cwDrumZ);   drumCw.userData.editName='CW drum';
+car.userData.editName='Car (cabin)';
+cw.userData.editName='Counterweight';
+
+// ---- ropes off the drums ----
+const ropeGrp=new THREE.Group();root.add(ropeGrp);
+function ropeCyl(){const m=new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.02,1,8),M.rope);
+  m.castShadow=true;ropeGrp.add(m);return m;}
+const ropeCar=ropeCyl(),ropeCw=ropeCyl();
+const beads=[];for(let i=0;i<14;i++){const b=new THREE.Mesh(new THREE.SphereGeometry(0.034,8,8),M.bead);
+  ropeGrp.add(b);beads.push(b);}
+function setRope(cyl,topY,botY,x,z){const h=Math.max(0.01,topY-botY);
+  cyl.scale.y=h;cyl.position.set(x,(topY+botY)/2,z);}
+
+// ============================================================
+//  CONTROLS
+// ============================================================
+const controls={target:new THREE.Vector3(0,4.5,0),theta:0.8,phi:1.12,radius:15,auto:false,pan:new THREE.Vector3()};
+function applyCam(){const t=controls.target.clone().add(controls.pan),r=controls.radius,p=controls.phi,th=controls.theta;
+  camera.position.set(t.x+r*Math.sin(p)*Math.sin(th),t.y+r*Math.cos(p),t.z+r*Math.sin(p)*Math.cos(th));
+  camera.lookAt(t);}
+(function(){const el=renderer.domElement;let dn=false,sx=0,sy=0,sh=false;
+  el.addEventListener('pointerdown',e=>{if(typeof edit!=='undefined'&&edit.dragging)return;dn=true;sx=e.clientX;sy=e.clientY;sh=e.shiftKey;});
+  addEventListener('pointerup',()=>dn=false);
+  addEventListener('pointermove',e=>{if(typeof edit!=='undefined'&&edit.dragging)return;if(!dn)return;const dx=e.clientX-sx,dy=e.clientY-sy;sx=e.clientX;sy=e.clientY;
+    if(sh){const s=controls.radius*0.0016;const rt=new THREE.Vector3().crossVectors(camera.up,
+      camera.getWorldDirection(new THREE.Vector3())).normalize();
+      controls.pan.addScaledVector(rt,dx*s);controls.pan.y+=dy*s;}
+    else{controls.theta-=dx*0.006;controls.phi=Math.max(0.12,Math.min(2.95,controls.phi-dy*0.006));}});
+  el.addEventListener('wheel',e=>{e.preventDefault();
+    controls.radius=Math.max(1.5,Math.min(60,controls.radius*(1+Math.sign(e.deltaY)*0.08)));},{passive:false});})();
+const CAMS={over:{t:[0,4.5,0],th:0.8,phi:1.12,r:15},
+  mech:{t:[0,8.7,-0.1],th:0.7,phi:1.0,r:5.5},
+  gears:{t:[-0.42,8.6,-0.65],th:0.7,phi:1.1,r:2.5},
+  car:{t:[0.2,4.5,1.0],th:0.5,phi:1.25,r:5.5},
+  cw:{t:[0,4.5,-0.82],th:Math.PI+0.5,phi:1.2,r:5.5}};
+function goCam(k){const c=CAMS[k];controls.target.set(...c.t);controls.theta=c.th;controls.phi=c.phi;
+  controls.radius=c.r;controls.pan.set(0,0,0);}
+goCam('over');
+
+let playing=true,speed=1,t=0,showLabels=true,cutaway=false;
+document.getElementById('play').onclick=function(){playing=!playing;
+  this.textContent=playing?'❚❚ Pause':'▶ Play';this.classList.toggle('act',playing);};
+document.getElementById('speed').oninput=e=>speed=parseFloat(e.target.value);
+document.querySelectorAll('[data-cam]').forEach(b=>b.onclick=()=>{goCam(b.dataset.cam);
+  document.querySelectorAll('[data-cam]').forEach(x=>x.classList.remove('act'));b.classList.add('act');});
+document.getElementById('labels').onclick=function(){showLabels=!showLabels;this.classList.toggle('act',showLabels);};
+document.getElementById('cut').onclick=function(){cutaway=!cutaway;shaftFront.visible=!cutaway;
+  this.classList.toggle('act',cutaway);};
+document.getElementById('orbit').onclick=function(){controls.auto=!controls.auto;this.classList.toggle('act',controls.auto);};
+
+// hide all overlays + labels for clean screen-recording (button or press H)
+let uiHidden=false;
+const uiEls=['title','data','ctrl','hint'].map(id=>document.getElementById(id));
+function setUI(hidden){uiHidden=hidden;uiEls.forEach(e=>e.style.display=hidden?'none':'');}
+document.getElementById('ui').onclick=()=>setUI(true);
+addEventListener('keydown',e=>{if(e.key==='h'||e.key==='H')setUI(!uiHidden);});
+
+const TAGS=[
+  {txt:'CW gearbox + generator',cls:'green',p:()=>new THREE.Vector3(-0.42,8.4,C.cwDrumZ)},
+  {txt:'Car gearbox + generator',cls:'green',p:()=>new THREE.Vector3(0.42,8.4,C.carDrumZ)},
+  {txt:'Bevel drive',cls:'amber',p:()=>new THREE.Vector3(-0.42,9.1,C.cwDrumZ)},
+  {txt:'Hoist drums',cls:'amber',p:()=>new THREE.Vector3(0,C.drumY+0.5,(C.carDrumZ+C.cwDrumZ)/2)},
+  {txt:'Car (cabin + sling)',cls:'',p:()=>new THREE.Vector3(0,car.position.y+C.carH/2+0.6,C.carZ+0.7)},
+  {txt:'Counterweight',cls:'',p:()=>new THREE.Vector3(0,cw.position.y+1.1,C.cwZ)},
+];
+const tagEls=TAGS.map(d=>{const e=document.createElement('div');e.className='tag '+d.cls;
+  e.textContent=d.txt;document.body.appendChild(e);return e;});
+
+const R={mass:d_mass,vel:d_vel,drum:d_drum,gear:d_gear,pow:d_pow,cyc:d_cyc};
+const dot=document.getElementById('dot'),stateTxt=document.getElementById('stateTxt');
+const g=9.81,mNet=520,signs={1:1,2:-1,3:1};
+
+// ============================================================
+//  TAB 2 — VARIABLE COUNTERWEIGHT REGENERATION SYSTEM
+// ============================================================
+const V={                                         // tab-2 constants
+  H:9.5,                                          // hoistway height
+  carW:1.30,carH:2.10,carD:1.30,                  // car bounding box
+  carZ:0.6,                                       // car centred forward
+  cwZ:-0.85,                                      // counterweight column position (behind car)
+  cabRopeX:0, cwRopeX:-0.05,                      // rope x-positions
+  travel:2.6, carMid:4.3,
+  drumY:8.95, bedTop:8.78,
+  paxMass:75,                                     // kg per passenger
+  carEmpty:480,                                   // car empty mass
+  baseCwt:480,                                    // cabled (base) mass — always present
+  barbellMass:80,                                 // mass per modular barbell
+  maxBarbells:8,
+  rotaryY:8.10,                                   // top of the variable counterweight column (rotary)
+  stackBaseY:1.05,                                // y of base of the cabled-mass stack
+  storageY:8.95,                                  // storage shelf height (in machine room above rotary)
+};
+
+const M2={
+  steel:    new THREE.MeshStandardMaterial({color:0x8a99a8,metalness:.85,roughness:.32}),
+  steelDk:  new THREE.MeshStandardMaterial({color:0x3a444f,metalness:.85,roughness:.45}),
+  cabPanel: new THREE.MeshStandardMaterial({color:0xb4c2d0,metalness:.6,roughness:.45}),
+  cabRoof:  new THREE.MeshStandardMaterial({color:0xc8b56b,metalness:.5,roughness:.55}),
+  cabFloor: new THREE.MeshStandardMaterial({color:0x3a322a,metalness:.3,roughness:.85}),
+  ramHead:  new THREE.MeshStandardMaterial({color:0x444a55,metalness:.85,roughness:.35}),
+  rail:     new THREE.MeshStandardMaterial({color:0x6e7d8d,metalness:.9,roughness:.25}),
+  rope:     new THREE.MeshStandardMaterial({color:0x202020,metalness:.4,roughness:.7}),
+  cwtFrame: new THREE.MeshStandardMaterial({color:0x7d8a98,metalness:.7,roughness:.45}),
+  baseMass: new THREE.MeshStandardMaterial({color:0x2a313a,metalness:.5,roughness:.55}),
+  bbDisc:   new THREE.MeshStandardMaterial({color:0x4f7da6,metalness:.65,roughness:.4}),
+  bbShaft:  new THREE.MeshStandardMaterial({color:0x6c87a0,metalness:.85,roughness:.32}),
+  bbCoil:   new THREE.MeshStandardMaterial({color:0xc05a2a,metalness:.4,roughness:.6,emissive:0x551a00,emissiveIntensity:0.0}),
+  bbActive: new THREE.MeshStandardMaterial({color:0x4f7da6,metalness:.65,roughness:.4,emissive:0x143a52,emissiveIntensity:0.3}),
+  rotary:   new THREE.MeshStandardMaterial({color:0x9aa6b3,metalness:.85,roughness:.3}),
+  rotaryHot:new THREE.MeshStandardMaterial({color:0x9aa6b3,metalness:.85,roughness:.3,emissive:0x18707a,emissiveIntensity:0.0}),
+  guideRoll:new THREE.MeshStandardMaterial({color:0x3a8c4f,metalness:.4,roughness:.6}),
+  pad:      new THREE.MeshStandardMaterial({color:0xb46a36,metalness:.3,roughness:.75}),
+};
+
+function box2(w,h,d,m,x,y,z){const g=new THREE.BoxGeometry(w,h,d);const o=new THREE.Mesh(g,m);
+  o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;t2Root.add(o);return o;}
+function box2_at(w,h,d,m,x,y,z){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);
+  o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;return o;}
+
+// Build a single barbell using the STL geometry (with stylised electromagnetic coils)
+function makeBarbell(){
+  const g=new THREE.Group();
+  const p=VCWT_PARTS.barbell;
+  const m=makeMeshFromPart(p, M2.bbDisc);
+  m.rotation.x=-Math.PI/2;
+  m.scale.setScalar(0.25);
+  m.position.y = -((p.bmin[2]+p.bmax[2])/2)*0.25;
+  g.add(m);
+  for(const yy of [-0.10, 0.10]){
+    const coil=new THREE.Mesh(new THREE.TorusGeometry(0.046, 0.008, 8, 22), M2.bbCoil);
+    coil.rotation.x=Math.PI/2; coil.position.y=yy; g.add(coil);
+  }
+  for(let i=0;i<4;i++){
+    const a=i*Math.PI/2;
+    const peg=new THREE.Mesh(new THREE.CylinderGeometry(0.014,0.014,0.02,12), M2.guideRoll);
+    peg.rotation.z=Math.PI/2;
+    peg.position.set(Math.cos(a)*0.05, 0, Math.sin(a)*0.05);
+    g.add(peg);
+  }
+  return g;
+}
+
+// ---- hoistway frame (mirrored from tab 1 style) ----
+const post2=new THREE.BoxGeometry(0.10,V.H,0.10);
+[[1.05,0.95],[-1.05,0.95],[1.05,-1.10],[-1.05,-1.10]].forEach(([x,z])=>{
+  const p=new THREE.Mesh(post2,M2.steelDk);p.position.set(x,V.H/2,z);p.castShadow=true;p.receiveShadow=true;t2Root.add(p);
+});
+// horizontal beams (top, bottom, mid)
+[0.18,V.H-0.10].forEach(y=>{
+  box2(2.30,0.10,0.10,M2.steelDk,0,y,0.95);
+  box2(2.30,0.10,0.10,M2.steelDk,0,y,-1.10);
+  box2(0.10,0.10,2.15,M2.steelDk,1.05,y,-0.075);
+  box2(0.10,0.10,2.15,M2.steelDk,-1.05,y,-0.075);
+});
+box2(2.30,0.10,0.10,M2.steelDk,0,V.H*0.55,0.95);
+box2(2.30,0.10,0.10,M2.steelDk,0,V.H*0.55,-1.10);
+
+// car-side guide rails
+[0.93,-0.93].forEach(x=>box2(0.06,V.H-0.4,0.10,M2.rail,x,V.H/2,V.carZ));
+// counterweight-side guide rails
+[-0.40,-1.30].forEach(z_=>box2(0.05,V.H-0.5,0.10,M2.rail,0.30,V.H/2,V.cwZ+(z_+0.85)*0.0)); // placeholder; replaced below
+// Actually use proper rails for the counterweight column
+[0.30,-0.30].forEach(dx=>box2(0.05,V.H-0.5,0.10,M2.rail,dx,V.H/2,V.cwZ));
+
+// machine room ceiling beam
+box2(2.30,0.18,2.15,M2.steel,0,V.H+0.10,-0.075);
+
+// ---- DETAILED CAB (using uploaded STL) ----
+// The STL is in its own coordinate frame; need to fit it into our 1.30x2.10x1.30 envelope.
+const cabGroup=new THREE.Group(); t2Root.add(cabGroup);
+{
+  const p=VCWT_PARTS.cab;
+  const cabMesh=makeMeshFromPart(p, M2.cabPanel);
+  // STL bbox: x[-0.767,0.479], y[-0.600,1.060], z[-0.068,2.793]. Long axis is Z (height).
+  // We want it oriented with height along world Y, and centered at origin in X/Z.
+  // Compute centroid and dims:
+  const dx=p.bmax[0]-p.bmin[0], dy=p.bmax[1]-p.bmin[1], dz=p.bmax[2]-p.bmin[2];
+  // STL Z is the cabin height (2.86m). Scale to V.carH (2.10m). Same uniform scale for x/y.
+  const scl = V.carH / dz;
+  cabMesh.scale.setScalar(scl);
+  cabMesh.rotation.x = -Math.PI/2;                     // tip so Z→Y
+  // After rotation: old (x,y,z) → (x, z, -y). New centre:
+  // new_x = (bmin.x+bmax.x)/2 * scl
+  // new_y = (bmin.z+bmax.z)/2 * scl
+  // new_z = -((bmin.y+bmax.y)/2) * scl
+  cabMesh.position.set(
+    -(p.bmin[0]+p.bmax[0])/2 * scl,
+    -(p.bmin[2]+p.bmax[2])/2 * scl + V.carH/2,
+     (p.bmin[1]+p.bmax[1])/2 * scl
+  );
+  cabGroup.add(cabMesh);
+}
+cabGroup.position.set(0, V.carMid - V.carH/2, V.carZ);
+
+// ---- RAM HEAD (simplified — uses car-top platform + ropes attach point) ----
+// Detailed ram head STL was too heavy; build a stylised version showing the assembly intent.
+{
+  const rh=new THREE.Group(); cabGroup.add(rh);
+  rh.add(new THREE.Mesh(new THREE.BoxGeometry(V.carW+0.20,0.06,V.carD+0.20),M2.ramHead));
+  rh.position.y=V.carH+0.04;
+  rh.children[0].castShadow=true;
+  // two crossheads carrying the rope hitch
+  const ch=new THREE.Mesh(new THREE.BoxGeometry(0.10,0.16,V.carD+0.20),M2.ramHead);
+  ch.position.set(0,0.11,0); rh.add(ch);
+  // hitch eye
+  const eye=new THREE.Mesh(new THREE.TorusGeometry(0.08,0.018,8,18),M2.steelDk);
+  eye.rotation.x=Math.PI/2; eye.position.set(0,0.24,0); rh.add(eye);
+}
+
+// ---- GUIDE ROLLERS on the car (simple gear-like wheels on each guide rail) ----
+[[0.93,-0.4],[0.93,0.4],[-0.93,-0.4],[-0.93,0.4]].forEach(([x,zoff])=>{
+  const r=new THREE.Group(); cabGroup.add(r);
+  // bracket
+  r.add(new THREE.Mesh(new THREE.BoxGeometry(0.10,0.10,0.10),M2.steelDk));
+  // wheel
+  const w=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,0.04,20),M2.guideRoll);
+  w.rotation.z=Math.PI/2; w.position.x = (x>0?-0.06:0.06); r.add(w);
+  r.position.set(x>0?V.carW/2-0.05:-V.carW/2+0.05, V.carH/2+zoff*0.6, 0);
+});
+
+// ---- VARIABLE COUNTERWEIGHT COLUMN ----
+const cwtCol=new THREE.Group(); t2Root.add(cwtCol);
+cwtCol.position.set(0, 0, V.cwZ);                         // base; the column moves vertically with travel
+cwtCol.userData.editName='Counterweight column';
+
+// (1) Cabled base mass — the always-present generator mass at the bottom
+{
+  const base=new THREE.Group(); cwtCol.add(base);
+  // main block
+  base.add(box2_at(0.60,0.40,0.50,M2.baseMass, 0,0.20,0));
+  // visible guide-rail-rollers on top corners (so it tracks the center rails)
+  [[0.25,0.18],[-0.25,0.18],[0.25,-0.18],[-0.25,-0.18]].forEach(([x,z])=>{
+    const w=new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.045,0.04,16),M2.guideRoll);
+    w.position.set(x,0.42,z); base.add(w);
+  });
+  // generator coil cylinder underneath
+  const g=new THREE.Mesh(new THREE.CylinderGeometry(0.10,0.10,0.10,16),M2.bbCoil);
+  g.position.y=-0.05; base.add(g);
+  base.userData.editName='Cabled base mass';
+}
+
+// (2) Vertical mass-guide shaft — the central rod barbells slide on
+const shaftLen = V.rotaryY - V.stackBaseY;
+const shaft=new THREE.Mesh(new THREE.CylinderGeometry(0.025,0.025,shaftLen,16),M2.steel);
+shaft.position.set(0, (V.rotaryY+V.stackBaseY)/2, 0); cwtCol.add(shaft);
+
+// (3) Rotary discharge station — sits at the top of the column.
+const rotary=new THREE.Group(); cwtCol.add(rotary);
+rotary.position.y=V.rotaryY;
+rotary.userData.editName='Rotary discharge station';
+// outer plate (the spinning ring with knob — uses varcwt STL for the top assembly)
+{
+  const p=VCWT_PARTS.varcwt;
+  const m=makeMeshFromPart(p, M2.rotary);
+  // STL bbox: x[-0.028,0.226], y[0.049,0.177], z[-1.122,0.138]. Long axis Z (downward shaft).
+  // We're going to use it for the TOP frame portion only. Anchor its top of frame at rotary.y=0 (local).
+  // Scale a bit (real-world it's 1.26m tall; we just want the top 25cm of it).
+  // Easier approach: just build a stylised rotary plate + knob ourselves.
+  // (still attach STL but hide for now to keep readable — keep small instance scale)
+}
+// Stylised rotary (clearer than the raw STL excerpt)
+{
+  const plate=new THREE.Mesh(new THREE.CylinderGeometry(0.32,0.32,0.08,32),M2.rotary);
+  plate.castShadow=true; rotary.add(plate);
+  // 4 slot recesses for barbells (radial slots in the rotary)
+  for(let i=0;i<4;i++){
+    const a=i*Math.PI/2;
+    const slot=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,0.09,18),M2.steelDk);
+    slot.position.set(Math.cos(a)*0.18, 0.005, Math.sin(a)*0.18);
+    rotary.add(slot);
+  }
+  // central spindle + knob (release control)
+  const sp=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,0.18,16),M2.steel);
+  sp.position.y=0.13; rotary.add(sp);
+  const knob=new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.06,0.06,18),M2.steel);
+  knob.position.y=0.25; rotary.add(knob);
+  // bottom port (hole in the floor of the rotary station)
+  const port=new THREE.Mesh(new THREE.TorusGeometry(0.08,0.014,10,28),M2.steelDk);
+  port.rotation.x=Math.PI/2; port.position.y=-0.04; rotary.add(port);
+}
+// Frame brackets around the rotary
+{
+  const box=new THREE.Group(); rotary.add(box);
+  // 4 vertical posts at the corners of the rotary housing
+  [[0.32,0.32],[-0.32,0.32],[0.32,-0.32],[-0.32,-0.32]].forEach(([x,z])=>{
+    box.add(box2_at(0.04,0.20,0.04,M2.cwtFrame,x,-0.06,z));
+  });
+  // bottom plate (with hole at center)
+  const r0=0.32, h=0.04;
+  const shape=new THREE.Shape();
+  shape.moveTo(-r0,-r0);shape.lineTo(r0,-r0);shape.lineTo(r0,r0);shape.lineTo(-r0,r0);shape.lineTo(-r0,-r0);
+  const hole=new THREE.Path(); hole.absarc(0,0,0.08,0,Math.PI*2,false); shape.holes.push(hole);
+  const bg=new THREE.ExtrudeGeometry(shape,{depth:h,bevelEnabled:false});
+  const bp=new THREE.Mesh(bg,M2.cwtFrame);
+  bp.rotation.x=Math.PI/2; bp.position.y=-0.16; bp.receiveShadow=true; box.add(bp);
+}
+
+// (4) Active barbell stack — children are barbells. We rebuild this on demand.
+const barbellStack=new THREE.Group(); cwtCol.add(barbellStack);
+// (5) Storage rack at the top of the machine room (extra barbells waiting to be deployed)
+const storage=new THREE.Group(); t2Root.add(storage);
+storage.position.set(0, V.storageY, V.cwZ);
+// Storage shelf
+{
+  storage.add(box2_at(1.0,0.04,0.50,M2.cabRoof, 0,0.30,0));
+  storage.add(box2_at(1.0,0.04,0.50,M2.cabRoof, 0,-0.05,0));
+  // tiny support columns
+  [[0.46,0.22],[-0.46,0.22],[0.46,-0.22],[-0.46,-0.22]].forEach(([x,z])=>storage.add(box2_at(0.04,0.36,0.04,M2.steelDk,x,0.13,z)));
+}
+
+// Single in-flight barbell that travels between storage and stack
+const flightBarbell = makeBarbell(); flightBarbell.visible=false; t2Root.add(flightBarbell);
+
+// Pre-populate the storage with maxBarbells visualised on the shelf
+const storageBarbells=[];
+for(let i=0;i<V.maxBarbells;i++){
+  const b=makeBarbell();
+  // spread along the shelf X direction
+  const px = -0.40 + (i%4)*0.27;
+  const py = (i<4 ? 0.10 : -0.20);
+  b.position.set(px, py + 0.13, 0);
+  b.rotation.z=Math.PI/2;                            // lay them down sideways on the shelf
+  storage.add(b); storageBarbells.push(b);
+}
+// Pre-populate active stack with 0 barbells initially; layoutStack() recomputes positions
+const activeBarbells=[];
+function layoutStack(){
+  const dy=0.22;                                     // spacing per barbell on the shaft
+  for(let i=0;i<activeBarbells.length;i++){
+    const b=activeBarbells[i];
+    b.position.set(0, V.stackBaseY + 0.42 + i*dy, 0);
+  }
+}
+function updateStorageVisibility(){
+  // hide storage barbells equal to # active (visually they have "moved" to the stack)
+  for(let i=0;i<storageBarbells.length;i++)
+    storageBarbells[i].visible = (i >= activeBarbells.length);
+}
+
+// State machine for transfers between storage and active stack
+const Vs={paxCount:0, targetN:0, transferring:false, transferT:0, transferDir:0, // 1=adding, -1=removing
+          rotaryAngle:0, rotarySpinSpeed:0, energy:0, cabY:V.carMid, cwtY:V.H - V.carMid,
+          paused:false, autoOrbit:false, labelsOn:true};
+function targetBarbellsFor(pax){
+  // Heuristic: balance car-load against counterweight (baseCwt + barbellMass*N) so they match at mid-travel.
+  // Ideal: pax*paxMass ≈ N*barbellMass  →  N = round(pax*paxMass/barbellMass)
+  return Math.max(0, Math.min(V.maxBarbells, Math.round(pax*V.paxMass/V.barbellMass)));
+}
+function requestAdjust(){
+  Vs.targetN = targetBarbellsFor(Vs.paxCount);
+  if(Vs.targetN > activeBarbells.length && !Vs.transferring){ startTransfer(+1); }
+  else if(Vs.targetN < activeBarbells.length && !Vs.transferring){ startTransfer(-1); }
+}
+function startTransfer(dir){
+  Vs.transferring=true; Vs.transferT=0; Vs.transferDir=dir; Vs.rotarySpinSpeed=8.0;
+  if(dir>0){
+    // a storage barbell becomes the in-flight one
+    const src = storageBarbells.find(b=>b.visible);
+    if(src){ src.visible=false; }
+    flightBarbell.visible=true;
+    // start position: at the storage shelf
+    flightBarbell.position.copy(storage.position);
+    flightBarbell.position.y = V.storageY + 0.13;
+  } else {
+    // an active barbell becomes the in-flight one
+    const top = activeBarbells.pop();
+    if(top){ cwtCol.remove(top); }
+    flightBarbell.visible=true;
+    // start at top of the previous stack position (just above the rotary's port)
+    flightBarbell.position.set(cwtCol.position.x, cwtCol.position.y + V.rotaryY - 0.04, cwtCol.position.z);
+    layoutStack();
+  }
+}
+function tickTransfer(dt){
+  if(!Vs.transferring) return;
+  const dur=2.2;                                                   // seconds per transfer
+  Vs.transferT += dt;
+  const t = Math.min(1, Vs.transferT/dur);
+  if(Vs.transferDir>0){
+    // Adding: storage → rotary → stack-top
+    // Phase 1 (t<0.30): slide horizontally from storage to rotary intake (at top, above port)
+    // Phase 2 (0.30<t<0.50): rotary spins, barbell lowers a touch
+    // Phase 3 (t>0.50): drop down the shaft, ease into stack
+    const tgtTopY = V.stackBaseY + 0.42 + activeBarbells.length*0.22;
+    const rotaryWorldY = cwtCol.position.y + V.rotaryY;
+    if(t<0.30){
+      const k=t/0.30;
+      flightBarbell.position.x = (1-k)*storage.position.x + k*cwtCol.position.x;
+      flightBarbell.position.z = (1-k)*storage.position.z + k*cwtCol.position.z;
+      flightBarbell.position.y = V.storageY + 0.13 + (rotaryWorldY + 0.13 - (V.storageY+0.13))*k;
+    } else if(t<0.50){
+      flightBarbell.position.x = cwtCol.position.x;
+      flightBarbell.position.z = cwtCol.position.z;
+      flightBarbell.position.y = rotaryWorldY + 0.13 - 0.20*((t-0.30)/0.20);
+    } else {
+      const k=(t-0.50)/0.50;
+      flightBarbell.position.x = cwtCol.position.x;
+      flightBarbell.position.z = cwtCol.position.z;
+      flightBarbell.position.y = (rotaryWorldY - 0.07)*(1-k) + (cwtCol.position.y + tgtTopY)*k;
+      // accumulate energy as it drops (gravity * mass * distance)
+      Vs.energy += V.barbellMass * 9.81 * 0.05 * (dt/dur);
+    }
+    if(t>=1){ // commit
+      Vs.transferring=false; Vs.rotarySpinSpeed=0;
+      flightBarbell.visible=false;
+      const newBB=makeBarbell(); cwtCol.add(newBB); activeBarbells.push(newBB); layoutStack();
+      updateStorageVisibility();
+      if(Vs.targetN!==activeBarbells.length) setTimeout(requestAdjust,400);  // chain another
+    }
+  } else {
+    // Removing: stack-top → rotary → storage
+    const stackTopY = V.stackBaseY + 0.42 + activeBarbells.length*0.22;
+    const rotaryWorldY = cwtCol.position.y + V.rotaryY;
+    if(t<0.50){
+      const k=t/0.50;
+      flightBarbell.position.x = cwtCol.position.x;
+      flightBarbell.position.z = cwtCol.position.z;
+      flightBarbell.position.y = (cwtCol.position.y + stackTopY)*(1-k) + (rotaryWorldY - 0.07)*k;
+    } else if(t<0.70){
+      flightBarbell.position.y = rotaryWorldY - 0.07 + 0.20*((t-0.50)/0.20);
+    } else {
+      const k=(t-0.70)/0.30;
+      flightBarbell.position.x = (1-k)*cwtCol.position.x + k*storage.position.x;
+      flightBarbell.position.z = (1-k)*cwtCol.position.z + k*storage.position.z;
+      flightBarbell.position.y = (rotaryWorldY + 0.13)*(1-k) + (V.storageY + 0.13)*k;
+    }
+    if(t>=1){
+      Vs.transferring=false; Vs.rotarySpinSpeed=0;
+      flightBarbell.visible=false;
+      const slot = storageBarbells.find(b=>!b.visible); if(slot) slot.visible=true;
+      updateStorageVisibility();
+      if(Vs.targetN!==activeBarbells.length) setTimeout(requestAdjust,400);
+    }
+  }
+  // animate rotary spin
+  rotary.rotation.y += Vs.rotarySpinSpeed*dt;
+  // glow rotary while active
+  M2.rotary.emissive = new THREE.Color(0x0a3a3f);
+  M2.rotary.emissiveIntensity = 0.4 + 0.4*Math.sin(Vs.transferT*8);
+}
+
+// Cab & counterweight Y motion under tab 2
+function tickTab2Motion(dt){
+  // Imbalance: car (carEmpty + paxCount*paxMass) vs counterweight (baseCwt + nBarbells*barbellMass).
+  const carM = V.carEmpty + Vs.paxCount*V.paxMass;
+  const cwtM = V.baseCwt + activeBarbells.length*V.barbellMass;
+  const delta = cwtM - carM;          // positive: cwt heavier → car rises
+  if(Vs.transferring){
+    // hold the cab steady during transfer
+  } else {
+    // mild approach to balanced position based on delta sign
+    const target = V.carMid + Math.sign(delta) * Math.min(Math.abs(delta)*0.005, V.travel/2);
+    Vs.cabY += (target - Vs.cabY) * Math.min(1, dt*1.3);
+    Vs.cwtY = (V.H - 0.4) - (Vs.cabY - V.carMid) - V.carH/2 - 1.5;  // moves opposite
+  }
+  cabGroup.position.y = Vs.cabY - V.carH/2;
+  cwtCol.position.y   = Math.max(1.0, Vs.cwtY);
+  // tag for status
+  const statusEl=document.getElementById('d2_status');
+  if(Vs.transferring) statusEl.textContent = Vs.transferDir>0?'loading barbell ↓':'unloading barbell ↑';
+  else if(Math.abs(delta) > V.barbellMass*0.5) statusEl.textContent = 'rebalancing…';
+  else statusEl.textContent = 'balanced';
+  document.getElementById('d2_pax').textContent = Vs.paxCount;
+  document.getElementById('d2_load').textContent = carM.toFixed(0)+' kg';
+  document.getElementById('d2_target').textContent = cwtM.toFixed(0)+' kg';
+  document.getElementById('d2_n').textContent = activeBarbells.length + (Vs.transferring?' (±1)':'');
+  document.getElementById('d2_egy').textContent = (Vs.energy/3600).toFixed(2)+' Wh';
+}
+
+// ---- Tab 2 ropes ----
+const ropeT2A=new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.02,1,8),M2.rope); t2Root.add(ropeT2A);
+const ropeT2B=new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.02,1,8),M2.rope); t2Root.add(ropeT2B);
+function setRopeT2(cyl, topY, botY, x, z){
+  const h=Math.max(0.01,topY-botY); cyl.scale.y=h;
+  cyl.position.set(x,(topY+botY)/2,z);
+}
+
+// Sheave (single shared) at the top
+const sheaveT2=new THREE.Mesh(new THREE.CylinderGeometry(0.30,0.30,0.18,28),M2.steelDk);
+sheaveT2.rotation.z=Math.PI/2; sheaveT2.position.set(0, V.H-0.05, (V.carZ+V.cwZ)/2); t2Root.add(sheaveT2);
+
+// ---- LABELS (tab 2) ----
+const TAGS2=[
+  {txt:'Rotary discharge station', cls:'green', p:()=>new THREE.Vector3(cwtCol.position.x, cwtCol.position.y+V.rotaryY+0.30, cwtCol.position.z)},
+  {txt:'Modular barbell masses',   cls:'amber', p:()=>new THREE.Vector3(cwtCol.position.x+0.45, cwtCol.position.y+V.stackBaseY+0.9, cwtCol.position.z)},
+  {txt:'Cabled base mass',         cls:'',      p:()=>new THREE.Vector3(cwtCol.position.x-0.45, cwtCol.position.y+V.stackBaseY+0.25, cwtCol.position.z)},
+  {txt:'Storage rack',             cls:'',      p:()=>new THREE.Vector3(storage.position.x+0.50, storage.position.y+0.40, storage.position.z)},
+  {txt:'Detailed cab',             cls:'',      p:()=>new THREE.Vector3(0, cabGroup.position.y+V.carH+0.5, V.carZ+0.7)},
+];
+
+// ---- Cameras (tab 2 presets) ----
+const cams2={
+  over:  {t:[0,5.0,-0.1],th:0.5,phi:1.05,r:14},
+  cwt:   {t:[0,V.carMid,V.cwZ],th:0.5,phi:1.20,r:4.2},
+  rotary:{t:[0,V.rotaryY,V.cwZ],th:0.6,phi:0.9,r:1.8},
+  cab:   {t:[0,V.carMid,V.carZ],th:0.7,phi:1.10,r:5.2},
+  cross: {t:[0,V.carMid,0],th:Math.PI/2,phi:1.2,r:9.5}
+};
+// ============================================================
+//  EDIT MODE  (toggle with button or E key)
+// ============================================================
+const edit={on:false, sel:null, step:0.05, dragging:false, dragMode:null, dragPlane:new THREE.Plane(),
+  dragStart:new THREE.Vector3(), objStart:new THREE.Vector3()};
+const raycaster=new THREE.Raycaster();
+const mouse=new THREE.Vector2();
+const editPanelEl=document.getElementById('editPanel');
+const editSelEl=document.getElementById('editSel');
+const editOutEl=document.getElementById('editOut');
+const editStepBtn=document.getElementById('editStep');
+
+// climb the parent chain to find the nearest editable group
+function findEditable(obj){
+  while(obj){ if(obj.userData && obj.userData.editName) return obj; obj=obj.parent; }
+  return null;
+}
+function updateSelLabel(){
+  if(!edit.sel){ editSelEl.textContent='(nothing selected)'; return; }
+  const p=edit.sel.position, r=edit.sel.rotation;
+  editSelEl.innerHTML=`<b style="color:#57d1e6">${edit.sel.userData.editName}</b><br>`+
+    `pos: [${p.x.toFixed(3)}, ${p.y.toFixed(3)}, ${p.z.toFixed(3)}]<br>`+
+    `rot: [${r.x.toFixed(3)}, ${r.y.toFixed(3)}, ${r.z.toFixed(3)}]`;
+}
+function toggleEdit(on){
+  edit.on = (on===undefined)?!edit.on:on;
+  editPanelEl.style.display=edit.on?'block':'none';
+  document.getElementById('edit').classList.toggle('act',edit.on);
+  if(!edit.on){ edit.sel=null; updateSelLabel(); }
+}
+document.getElementById('edit').onclick=()=>toggleEdit();
+addEventListener('keydown',e=>{ if(e.key==='e'||e.key==='E') toggleEdit(); });
+
+// click to select (uses pointerup with no drag, to avoid orbit conflict)
+let clickT=0, clickX=0, clickY=0;
+renderer.domElement.addEventListener('pointerdown',e=>{
+  if(!edit.on) return;
+  clickT=performance.now(); clickX=e.clientX; clickY=e.clientY;
+});
+renderer.domElement.addEventListener('pointerup',e=>{
+  if(!edit.on) return;
+  const moved=Math.hypot(e.clientX-clickX,e.clientY-clickY);
+  if(moved>5 || performance.now()-clickT>400) return;     // it was a drag/orbit, not a click
+  const rect=renderer.domElement.getBoundingClientRect();
+  mouse.x= ((e.clientX-rect.left)/rect.width)*2-1;
+  mouse.y=-((e.clientY-rect.top)/rect.height)*2+1;
+  raycaster.setFromCamera(mouse,camera);
+  const hits=raycaster.intersectObject(scene,true);
+  for(const h of hits){
+    const ed=findEditable(h.object);
+    if(ed){ edit.sel=ed; updateSelLabel(); return; }
+  }
+  edit.sel=null; updateSelLabel();
+});
+
+// drag the selected object across the ground plane (or up/down with shift)
+renderer.domElement.addEventListener('pointerdown',e=>{
+  if(!edit.on || !edit.sel) return;
+  const rect=renderer.domElement.getBoundingClientRect();
+  mouse.x= ((e.clientX-rect.left)/rect.width)*2-1;
+  mouse.y=-((e.clientY-rect.top)/rect.height)*2+1;
+  raycaster.setFromCamera(mouse,camera);
+  const hits=raycaster.intersectObject(scene,true);
+  // only start drag if click is on the currently-selected editable
+  for(const h of hits){
+    if(findEditable(h.object)===edit.sel){
+      edit.dragging=true; edit.dragMode=e.shiftKey?'y':'xz';
+      const wp=new THREE.Vector3(); edit.sel.getWorldPosition(wp);
+      if(edit.dragMode==='xz') edit.dragPlane.setFromNormalAndCoplanarPoint(new THREE.Vector3(0,1,0),wp);
+      else                     edit.dragPlane.setFromNormalAndCoplanarPoint(camera.getWorldDirection(new THREE.Vector3()).setY(0).normalize(),wp);
+      raycaster.ray.intersectPlane(edit.dragPlane,edit.dragStart);
+      edit.objStart.copy(edit.sel.position);
+      e.stopPropagation();
+      return;
+    }
+  }
+},true);
+addEventListener('pointermove',e=>{
+  if(!edit.dragging || !edit.sel) return;
+  const rect=renderer.domElement.getBoundingClientRect();
+  mouse.x= ((e.clientX-rect.left)/rect.width)*2-1;
+  mouse.y=-((e.clientY-rect.top)/rect.height)*2+1;
+  raycaster.setFromCamera(mouse,camera);
+  const p=new THREE.Vector3();
+  if(!raycaster.ray.intersectPlane(edit.dragPlane,p)) return;
+  const d=p.clone().sub(edit.dragStart);
+  // convert world delta to parent-local delta
+  const parent=edit.sel.parent;
+  const wm=new THREE.Matrix4().copy(parent.matrixWorld).invert();
+  const dLocal=d.clone().transformDirection(wm);
+  if(edit.dragMode==='xz'){ edit.sel.position.set(edit.objStart.x+dLocal.x,edit.objStart.y,edit.objStart.z+dLocal.z); }
+  else                    { edit.sel.position.set(edit.objStart.x,edit.objStart.y+d.y,edit.objStart.z); }
+  updateSelLabel();
+});
+addEventListener('pointerup',()=>edit.dragging=false);
+
+// keyboard nudge / rotate / reset / deselect
+addEventListener('keydown',e=>{
+  if(!edit.on||!edit.sel) return;
+  if(e.target.tagName==='INPUT') return;
+  const s=edit.step;
+  const map={ArrowLeft:[-s,0,0],ArrowRight:[s,0,0],ArrowUp:[0,0,-s],ArrowDown:[0,0,s],PageUp:[0,s,0],PageDown:[0,-s,0]};
+  if(map[e.key]){ const d=map[e.key]; edit.sel.position.x+=d[0]; edit.sel.position.y+=d[1]; edit.sel.position.z+=d[2]; updateSelLabel(); e.preventDefault(); return; }
+  const rstep=Math.PI/12; // 15°
+  if(e.key==='1'){ edit.sel.rotation.x+=rstep; updateSelLabel(); }
+  else if(e.key==='2'){ edit.sel.rotation.y+=rstep; updateSelLabel(); }
+  else if(e.key==='3'){ edit.sel.rotation.z+=rstep; updateSelLabel(); }
+  else if(e.key==='r'||e.key==='R'){ edit.sel.rotation.set(0,0,0); updateSelLabel(); }
+  else if(e.key==='Escape'){ edit.sel=null; updateSelLabel(); }
+});
+
+// cycle step size 5cm <-> 1cm <-> 20cm
+editStepBtn.onclick=()=>{
+  edit.step = edit.step===0.05?0.01: edit.step===0.01?0.20:0.05;
+  editStepBtn.textContent='Step: '+(edit.step*100).toFixed(0)+'cm';
+};
+// dump positions of all editable groups
+document.getElementById('editPrint').onclick=()=>{
+  const out=[];
+  scene.traverse(o=>{ if(o.userData&&o.userData.editName){
+    const p=o.position, r=o.rotation;
+    out.push(`${o.userData.editName.padEnd(28)}  pos:[${p.x.toFixed(3)}, ${p.y.toFixed(3)}, ${p.z.toFixed(3)}]  rot:[${r.x.toFixed(3)}, ${r.y.toFixed(3)}, ${r.z.toFixed(3)}]`);
+  }});
+  editOutEl.style.display='block'; editOutEl.textContent=out.join('\n');
+};
+
+let beadOff=0,last=performance.now();
+function frame(now){
+  const dt=Math.min(0.05,(now-last)/1000);last=now;
+  if(playing)t+=dt*speed*0.5;
+  const s=Math.sin(t);
+  const carY=C.carMid+C.travel*s, cwY=C.cwMid-C.travel*s;
+  if(edit.sel!==car) car.position.y=carY;
+  if(edit.sel!==cw)  cw.position.y=cwY;
+  const vel=C.travel*Math.cos(t)*speed*0.5;
+  const carTop=carY+C.carH/2+0.42, cwTop=cwY+1.05;
+
+  // ropes drop from drum tangents
+  setRope(ropeCar,C.drumY,carTop,C.carRopeX,C.carDrumZ);
+  setRope(ropeCw ,C.drumY,cwTop ,C.cwRopeX,C.cwDrumZ);
+
+  // kinematics: rod ω = v / rDrum ; gears amplified
+  const omegaRod=vel/C.rDrum;
+  const G=2.0;
+  drumCar.rotation.x+=omegaRod*dt*G;
+  drumCw.rotation.x -=omegaRod*dt*G;       // opposite winding
+  const gearW=omegaRod*C.ratio;
+  allSpin.forEach(o=>{
+    if(o.grp===4)o.mesh.rotation[o.axis]+=omegaRod*dt*G;
+    else o.mesh.rotation[o.axis]+=gearW*signs[o.grp]*dt*G;});
+  // both right-angle bevel drives turn with the rod
+  bevels.forEach(bv=>{bv.bevA.rotation.y+=omegaRod*dt*G; bv.bevB.rotation.y-=omegaRod*dt*G;});
+
+  // beads along rope runs (direction of travel)
+  beadOff+=vel*dt*0.5;
+  beads.forEach((b,i)=>{const half=beads.length/2;
+    if(i<half){const f=((i/half)+beadOff)%1,ff=(f+1)%1;
+      b.position.set(C.carRopeX,carTop+(C.drumY-carTop)*ff,C.carDrumZ);}
+    else{const f=(((i-half)/half)-beadOff)%1,ff=(f+1)%1;
+      b.position.set(C.cwRopeX,cwTop+(C.drumY-cwTop)*ff,C.cwDrumZ);}});
+
+  // regeneration
+  const power=Math.abs(vel)*mNet*g/1000, regen=Math.abs(vel)>0.06;
+  const desc=vel>0?'Counterweight':(vel<0?'Car-side mass':'— (reversal)');
+  const glow=regen?Math.min(1,power/4):0;
+  M.gearA.emissiveIntensity=M.gearC.emissiveIntensity=glow;
+  M.gearB.emissiveIntensity=glow*0.6;
+  M.gen.emissiveIntensity=regen?1.0:0.15;        // both green generators light up
+
+  dot.classList.toggle('on',regen);
+  stateTxt.textContent=regen?'REGENERATING — recovering energy':'reversal (zero velocity)';
+  stateTxt.style.color=regen?'#5be08a':'#7d8a9b';
+  R.mass.textContent=desc;R.vel.textContent=vel.toFixed(2)+' m/s';
+  R.drum.textContent=Math.abs(omegaRod*9.55).toFixed(0)+' rpm';
+  R.gear.textContent=Math.abs(omegaRod*9.55*C.ratio).toFixed(0)+' rpm';
+  R.pow.textContent=power.toFixed(2)+' kW';
+  R.cyc.textContent=s>0?'car ascending':'car descending';
+
+  if(controls.auto)controls.theta+=dt*0.18;
+  applyCam();
+  tagEls.forEach((e,i)=>{if(!showLabels||uiHidden){e.style.opacity=0;return;}
+    const v=TAGS[i].p().project(camera);if(v.z>1){e.style.opacity=0;return;}
+    e.style.opacity=0.95;e.style.left=((v.x*0.5+0.5)*innerWidth)+'px';
+    e.style.top=((-v.y*0.5+0.5)*innerHeight)+'px';});
+  renderer.render(scene,camera);requestAnimationFrame(frame);
+}
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;
+  camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+document.getElementById('load').style.display='none';
+requestAnimationFrame(frame);
+</script>

@@ -1,0 +1,88 @@
+================================================================================
+HOW THE SIMULATION WORKS — EXPLAINED WITH ZERO PHYSICS KNOWLEDGE
+(No physics terms: just time, lists, "in vs out," and adding up)
+================================================================================
+
+This is the same simulation explained without using physics words. Think of it
+as: we track "how much we put in" and "how much we get back" over one full
+cycle, then we see the ratio and the difference.
+
+
+---- THE BIG PICTURE ----
+
+Each system is like a machine that:
+• Uses electricity to move a heavy thing upward (that's "putting in").
+• When the heavy thing comes back down, it can produce some electricity (that's "getting back").
+
+We don't build the machine. We pretend we know how long each part of the cycle takes and how fast the thing moves during each part. Then we figure out, step by step, "how much did we put in?" and "how much did we get back?" and we write those as numbers. At the end we compare: get-back divided by put-in (that's our "efficiency" number), and get-back minus put-in (that's "net"—usually negative, meaning we lost more than we got back).
+
+
+---- STEP BY STEP (NO PHYSICS TERMS) ----
+
+1. We decide the rules for one cycle.
+   • Same "size" for all four systems: the thing moves over the same height (3 m) and the "effective weight" we care about is the same (50 kg) so the comparison is fair.
+   • For each design we decide how long each part of the cycle lasts. For example, one system might have "going down for 2.8 seconds" then "going up for 3.2 seconds," so the full cycle is 6 seconds. Another might have "going up, then waiting in water, then going down" with different times. We write those durations down and don't change them.
+
+2. We make a list of moments in time.
+   • We don't care about every single instant—we take a bunch of points in time from the start to the end of the cycle. For example 250 points from 0 to 6 seconds. So we have a list of 250 numbers: 0, 0.024, 0.048, ... 6. That's our "time list." We do the same for each system (maybe 250, 300, or 400 points depending on how long the cycle is).
+
+3. For each moment, we know which part of the cycle we're in.
+   • For every number in the time list we ask: "Right now, are we in the 'going down' part or the 'going up' part?" (or "lifting," "water," "docking," etc. depending on the system). We get a yes/no for each moment. So we have a list of true/false that lines up with the time list. We use that so we only "fill in" numbers when they make sense—e.g. we only talk about "how fast it's going down" during the going-down part.
+
+4. We decide how fast the thing is moving at each moment.
+   • We don't solve any equation of motion. We just say: "In this part of the cycle, speed follows a simple rule." For example: at the start of the phase speed is zero, it goes up to a maximum in the middle, then back to zero at the end. So we use a formula that takes "how far through this part we are" (a number from 0 to 1) and gives a speed. That way the motion is smooth—no sudden jumps. We do that for each part of the cycle (down, up, etc.) and only put a number where that part is "true." So we end up with a list of speeds, one per time point.
+
+5. From "how fast" we get "how much we're putting in or getting out" at each moment.
+   • When the thing is going down, the system can "get out" some electricity. When it's going up (or when we're running a motor or a pump), we "put in" electricity. The rate of "put in" or "get out" at any moment depends on how fast the thing is moving and how heavy it is—we use a simple rule (like "bigger weight and faster speed mean more"). So for each moment we have either a "put-in rate" or a "get-out rate" (or zero). We store those in two lists: one for "get out" and one for "put in," both lined up with the time list. When we're "getting out" we multiply that rate by a number less than 1 (like 0.72) to represent that we don't get 100% back; when we're "putting in" we divide by a number like 0.88 to represent that we have to use more than the ideal amount. So we're being realistic: we always put in more than we get back in total.
+
+6. We add up "get out" and "put in" over the whole cycle.
+   • So far we have a list of "get-out rates" and "put-in rates" at many moments. To get "total we got out" and "total we put in" we need to add those rates up over time—like adding the area under a curve. We use a built-in MATLAB function (trapz) that does that: you give it the time list and the list of rates, and it gives you one number (the total). So we get two numbers: total got out, and total put in.
+
+7. We compute the two main results.
+   • "Efficiency" = (total got out) ÷ (total put in), as a percentage. So if we got out 72 and put in 100, efficiency is 72%. That's "how much we got back per unit we put in."
+   • "Net" = total got out minus total put in. Usually that's negative (we put in more than we got out). So we're measuring "how much we lost" in one cycle.
+
+8. We repeat the whole thing 10 times with slightly different "realism" numbers.
+   • The numbers we use for "how much we get back" and "how much we have to put in" (the 0.72, 0.88, etc.) are not perfect in real life—they vary a bit. So we run the same steps 1–7 ten times, but each time we change those numbers a little (we add a small random bump). So we get 10 different "efficiency" and 10 different "net" numbers per system. That way we can later average them and see how much they spread (mean and standard deviation) and do statistics (ANOVA) to see if the four systems really differ.
+
+9. We average and compare.
+   • For each system we take the average of the 10 efficiency values and the average of the 10 net values. Those are what we plot as the bar height. The spread of the 10 values gives us the error bar. Then we do the ANOVA: we see how much of the variation in the 40 numbers (4 systems × 10 runs) is "between systems" vs "within each system." If "between" is big compared to "within," we say the systems really are different.
+
+
+---- IN ONE PARAGRAPH (say this if someone wants the shortest version) ----
+
+"We pretend one full cycle for each design—we know how long each part lasts (e.g. down 2.8 s, up 3.2 s). We make a list of hundreds of time points in that cycle. For each time we know which part we're in (down or up, etc.). We assign a speed at each time using a simple formula so it's smooth. From speed and the weight we get a 'rate of put-in' or 'rate of get-out' at each moment, and we use small numbers to make it realistic (we don't get 100% back). We add up those rates over time with trapz to get total put-in and total get-out. Efficiency is get-out divided by put-in; net is get-out minus put-in. We do that 10 times per system with slightly different realism numbers, then we average and do statistics to see if the four systems really perform differently."
+
+
+---- WORDS WE AVOIDED (and what we used instead) ----
+
+• Velocity / speed → "how fast the thing is moving"
+• Force → not needed; we only said "weight" and "how fast"
+• Power → "rate of put-in" or "rate of get-out" (how much per second)
+• Energy → "total put-in" or "total got out" (add up the rates over time)
+• Mechanical vs electrical → we said "we convert using a number" (efficiency)
+• Mass → "weight" or "how heavy"
+• Phase → "part of the cycle" (e.g. going down, going up)
+• Integrate → "add up over time" (trapz does that)
+• Efficiency (physics) → "how much we got back per unit we put in"
+• Net energy → "get-out minus put-in" (usually negative = we lost)
+
+
+---- IF THEY ASK "WHAT'S TAU?" ----
+
+"Tau is just 'how far through this part of the cycle we are'—a number from 0 to 1. So at the start of the descent tau is 0, at the end of the descent tau is 1, and in the middle it's 0.5. We use it in a formula so that speed is zero at the start and end and peaks in the middle—so the motion is smooth."
+
+
+---- IF THEY ASK "WHAT'S TRAPZ?" ----
+
+"We have a list of time points and a list of 'rates' (how much we're putting in or getting out at each moment). To get the total amount we put in or got out over the whole cycle we need to add up those rates over time—like the area under a curve. trapz is a MATLAB function that does that: you give it the time list and the rate list and it gives you one number—the total."
+
+
+---- IF THEY ASK "WHY 10 TIMES?" ----
+
+"In reality the 'realism' numbers (how much we get back per unit we put in) would vary a bit every time. So instead of running once and getting one number per system we run 10 times with slightly different numbers each time. That gives us 10 numbers per system so we can average them and see how much they spread—and we can do proper statistics (like ANOVA) to say whether the four systems really differ or if it could be chance."
+
+================================================================================
+Use this when you need to explain the simulation to someone with no physics
+background, or when you want to think through it without physics jargon.
+================================================================================

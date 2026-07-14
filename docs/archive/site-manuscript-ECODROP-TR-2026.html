@@ -1,0 +1,910 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EcoDrop ┬╖ Gravitational Energy StorageΓÇôRegeneration Systems ΓÇö Interactive Technical Record</title>
+<meta name="description" content="Interactive technical record of the EcoDrop project: a measured weight-drop prototype, four simulated gravity storage architectures, full component iteration logs, mathematical model, and computational apparatus.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>
+/* ============ document tokens ΓÇö inherited from TECHNICAL_DOCUMENTATION.tex ============ */
+:root{
+  --ink:#111820; --ink2:#2b3542; --muted:#5c6675; --faint:#8a94a3;
+  --blueprint:#0c63b7; --cyan:#23a7d8; --orange:#e08d2d; --green:#2a9d63;
+  --panel:#f6f8fb; --darkpanel:#eaf0f7; --gridgray:#d9e1ea; --linegray:#c7d1db;
+  --paper:#fefefd;
+  --serif:'STIX Two Text',Georgia,serif;
+  --sans:'IBM Plex Sans',-apple-system,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono',Consolas,monospace;
+  --measure:66ch; --rail:270px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:17.5px;line-height:1.72;-webkit-font-smoothing:antialiased;counter-reset:sec fig tbl eq sn}
+img{max-width:100%;display:block}
+a{color:var(--blueprint);text-decoration:none}
+a:hover{text-decoration:underline}
+code{font-family:var(--mono);font-size:.78em;background:var(--panel);border:1px solid var(--gridgray);padding:1px 5px;border-radius:3px}
+::selection{background:#cfe4f7}
+
+/* ============ chrome ============ */
+#progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--blueprint),var(--cyan));width:0;z-index:60}
+header.doc{position:sticky;top:0;z-index:50;background:rgba(254,254,253,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--gridgray)}
+header.doc .row{max-width:1280px;margin:0 auto;padding:10px 26px;display:flex;align-items:center;gap:16px}
+header.doc .id{font-family:var(--mono);font-size:.78rem;font-weight:600;letter-spacing:.03em}
+header.doc .id b{color:var(--blueprint);font-weight:600}
+header.doc .pos{font-family:var(--mono);font-size:.7rem;color:var(--faint);margin-left:auto;white-space:nowrap}
+header.doc .links{display:flex;gap:2px}
+header.doc .links a{font-family:var(--sans);font-size:.74rem;font-weight:500;color:var(--muted);padding:4px 9px;border-radius:4px}
+header.doc .links a:hover{background:var(--panel);color:var(--ink);text-decoration:none}
+@media(max-width:900px){header.doc .pos{display:none}}
+
+/* ============ shell ============ */
+.shell{max-width:1280px;margin:0 auto;padding:0 26px;display:grid;grid-template-columns:230px minmax(0,1fr);gap:0}
+@media(max-width:1080px){.shell{grid-template-columns:1fr}.spine{display:none}}
+.spine{border-right:1px solid var(--gridgray)}
+.spine .in{position:sticky;top:56px;max-height:calc(100vh - 56px);overflow-y:auto;padding:36px 20px 36px 2px;font-family:var(--sans);scrollbar-width:thin}
+.spine .h{font-size:.62rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin-bottom:12px}
+.spine a{display:block;font-size:.76rem;color:var(--muted);padding:3.5px 0 3.5px 12px;border-left:2px solid transparent;line-height:1.45}
+.spine a.l2{padding-left:26px;font-size:.71rem;color:var(--faint)}
+.spine a:hover{color:var(--ink);text-decoration:none}
+.spine a.on{color:var(--blueprint);border-left-color:var(--blueprint)}
+.spine .fm{margin-top:22px;padding-top:16px;border-top:1px solid var(--gridgray)}
+.spine .fm a{padding-left:0;border-left:0;font-size:.72rem}
+
+/* ============ manuscript column + margin rail ============ */
+main{padding:0 0 110px 56px;min-width:0}
+@media(max-width:720px){main{padding-left:0}}
+.mw{max-width:calc(var(--measure) + var(--rail) + 40px);position:relative}
+.body-text{max-width:var(--measure)}
+p{max-width:var(--measure);margin-bottom:15px;color:var(--ink2);text-align:justify;hyphens:auto}
+p.nojust{text-align:left;hyphens:none}
+ul.man,ol.man{max-width:var(--measure);margin:0 0 15px 24px;color:var(--ink2)}
+ul.man li,ol.man li{margin-bottom:6px}
+
+/* Tufte margin notes */
+.sn{float:right;clear:right;width:calc(var(--rail) - 30px);margin-right:0;margin-left:20px;font-family:var(--sans);font-size:.73rem;line-height:1.55;color:var(--muted);border-top:1px solid var(--gridgray);padding-top:6px;margin-top:4px;margin-bottom:14px}
+.sn .snn{font-family:var(--mono);font-size:.64rem;color:var(--blueprint);letter-spacing:.06em}
+.snref{counter-increment:sn}
+.snref::after{content:counter(sn);vertical-align:super;font-size:.6em;color:var(--blueprint);font-family:var(--sans);margin-left:1px}
+.sn::before{counter-increment:none;content:counter(sn) "  ";font-family:var(--mono);font-size:.66rem;color:var(--blueprint)}
+@media(max-width:1080px){.sn{float:none;width:auto;margin:10px 0 16px;padding:8px 12px;border:1px solid var(--gridgray);border-left:2px solid var(--cyan);background:var(--panel);border-radius:0 6px 6px 0}}
+
+/* ============ headings ΓÇö auto-numbered ============ */
+section.sec{counter-increment:sec;counter-reset:sub;padding-top:54px;scroll-margin-top:64px}
+section.sec>h2{font-size:1.5rem;font-weight:700;letter-spacing:-.01em;border-bottom:2.5px solid var(--ink);padding-bottom:9px;margin-bottom:24px;max-width:calc(var(--measure) + 40px)}
+section.sec>h2::before{content:"┬º" counter(sec) "  ";font-family:var(--mono);font-size:1.05rem;font-weight:600;color:var(--blueprint)}
+.sub{counter-increment:sub;scroll-margin-top:64px}
+h3.sub{font-size:1.08rem;font-weight:700;margin:32px 0 12px;max-width:var(--measure)}
+h3.sub::before{content:counter(sec) "." counter(sub) "  ";font-family:var(--mono);font-size:.85rem;font-weight:600;color:var(--blueprint)}
+h4{font-family:var(--sans);font-size:.85rem;font-weight:600;letter-spacing:.02em;margin:20px 0 8px;color:var(--ink)}
+
+/* ============ front matter ============ */
+.front{padding-top:56px}
+.docline{font-family:var(--mono);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--blueprint);display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.docline span{color:var(--faint)}
+h1{font-size:clamp(1.75rem,3.5vw,2.7rem);font-weight:700;line-height:1.18;letter-spacing:-.015em;max-width:24ch}
+.subtitle{font-size:1.18rem;font-style:italic;color:var(--muted);margin-top:14px;max-width:52ch;line-height:1.5}
+.authorrow{margin-top:26px;font-family:var(--sans);font-size:.95rem}
+.authorrow b{font-weight:600}
+.authorrow .aff{font-size:.78rem;color:var(--faint);margin-top:4px}
+.abstract{margin:34px 0 0;max-width:calc(var(--measure) + 20px);border:1px solid var(--linegray);border-left:3px solid var(--blueprint);background:var(--panel);padding:22px 26px;border-radius:0 6px 6px 0}
+.abstract .lbl{font-family:var(--sans);font-size:.66rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--blueprint);margin-bottom:10px}
+.abstract p{font-size:.93rem;line-height:1.7;margin:0;max-width:none}
+.kw{font-family:var(--sans);font-size:.78rem;color:var(--muted);margin-top:18px;max-width:var(--measure)}
+.kw b{font-weight:600;color:var(--ink)}
+.metatable{margin:30px 0 0;max-width:calc(var(--measure) + 20px);border:1px solid var(--gridgray);border-radius:6px;overflow:hidden;font-family:var(--sans);font-size:.78rem}
+.metatable .r{display:grid;grid-template-columns:190px 1fr;border-bottom:1px solid var(--gridgray)}
+.metatable .r:last-child{border-bottom:0}
+.metatable .k{background:var(--panel);padding:8px 14px;font-weight:600;color:var(--muted);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase}
+.metatable .v{padding:8px 14px;color:var(--ink2)}
+.metatable .v code{font-size:.72rem}
+
+/* ============ artifacts: figures, tables, equations ============ */
+.artifact{margin:30px 0;border:1px solid var(--linegray);border-radius:6px;background:#fff;max-width:calc(var(--measure) + 40px);overflow:hidden}
+.artifact .head{display:flex;align-items:center;gap:10px;padding:8px 16px;background:var(--panel);border-bottom:1px solid var(--gridgray);font-family:var(--mono);font-size:.66rem;letter-spacing:.08em;color:var(--muted);flex-wrap:wrap}
+.artifact .head .no{font-weight:600;color:var(--ink)}
+.artifact .head .src{margin-left:auto;color:var(--faint);font-size:.62rem}
+.artifact .payload{padding:16px}
+.artifact .payload.tight{padding:0}
+.artifact figcaption,.artifact .cap{padding:11px 16px;border-top:1px solid var(--gridgray);font-family:var(--sans);font-size:.8rem;color:var(--muted);line-height:1.55}
+.artifact figcaption b,.artifact .cap b{color:var(--ink);font-weight:600}
+figure.artifact{counter-increment:fig}
+figure.artifact .no::before{content:"FIG. " counter(fig)}
+.artifact.tblwrap{counter-increment:tbl}
+.artifact.tblwrap .no::before{content:"TABLE " counter(tbl)}
+.imgsplit{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+.imgsplit.three{grid-template-columns:1fr 1fr 1fr}
+@media(max-width:700px){.imgsplit,.imgsplit.three{grid-template-columns:1fr}}
+.imgsplit .sub-lbl{font-family:var(--sans);font-size:.68rem;color:var(--faint);margin-top:6px}
+.pv{font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;padding:2px 7px;border-radius:3px;border:1px solid}
+.pv.m{color:#1e7a44;border-color:#bfe3cd;background:#f1faf4}
+.pv.s{color:var(--blueprint);border-color:#c3ddf2;background:#f0f7fd}
+.pv.c{color:#a8620f;border-color:#f0d9bb;background:#fdf6ec}
+.pv.x{color:#a03d33;border-color:#eccfcb;background:#fdf3f1}
+
+/* equations */
+.eqn{display:flex;align-items:center;gap:20px;margin:20px 0;max-width:calc(var(--measure) + 40px);counter-increment:eq}
+.eqn .k{flex:1;overflow-x:auto;padding:14px 18px;border:1px solid var(--gridgray);border-radius:6px;background:var(--panel)}
+.eqn .no{font-family:var(--mono);font-size:.74rem;color:var(--muted);flex:none}
+.eqn .no::before{content:"(" counter(eq) ")"}
+
+/* data tables */
+table.data{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.82rem}
+table.data th{border-top:2px solid var(--ink);border-bottom:1px solid var(--ink);padding:8px 12px;text-align:left;font-size:.67rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);font-weight:600}
+table.data td{border-bottom:1px solid var(--gridgray);padding:8px 12px;color:var(--ink2);vertical-align:top}
+table.data tr:last-child td{border-bottom:2px solid var(--ink)}
+table.data .num{font-family:var(--mono);font-size:.74rem;font-variant-numeric:tabular-nums}
+table.data td b{font-weight:650;color:var(--ink)}
+
+/* iteration record */
+.iter{border:1px solid var(--gridgray);border-radius:6px;margin:14px 0;max-width:calc(var(--measure) + 40px);background:#fff;overflow:hidden}
+.iter .ih{display:flex;align-items:baseline;gap:12px;padding:9px 16px;background:var(--panel);border-bottom:1px solid var(--gridgray);font-family:var(--sans);flex-wrap:wrap}
+.iter .ih .it-no{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+.iter .ih .it-name{font-weight:600;font-size:.88rem}
+.iter .ih .cost{font-family:var(--mono);font-size:.68rem;color:var(--faint);margin-left:auto}
+.iter .ib{padding:13px 16px;font-family:var(--sans);font-size:.84rem;line-height:1.62;color:var(--ink2)}
+.iter .ib .fl{display:block;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;font-weight:600;margin:9px 0 3px}
+.iter .ib .fl.bad{color:#a03d33}.iter .ib .fl.good{color:#1e7a44}
+.iter.rejected{border-left:3px solid #c4766c}
+.iter.final{border-left:3px solid var(--green)}
+.iter .verdict{font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;padding:2px 8px;border-radius:3px}
+.iter.rejected .verdict{color:#a03d33;background:#fdf3f1;border:1px solid #eccfcb}
+.iter.final .verdict{color:#1e7a44;background:#f1faf4;border:1px solid #bfe3cd}
+
+/* logbook excerpt */
+.lbx{border-left:3px solid var(--orange);background:#fdfaf4;padding:14px 20px;margin:22px 0;max-width:calc(var(--measure) + 20px);border-radius:0 6px 6px 0}
+.lbx .t{font-family:var(--mono);font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:#a8620f;margin-bottom:7px}
+.lbx p{font-size:.9rem;font-style:italic;margin:0;color:var(--ink2)}
+
+/* demos */
+.demotabs{display:flex;flex-wrap:wrap;gap:6px;margin:24px 0 0;max-width:calc(var(--measure) + 40px)}
+.demotabs button{font-family:var(--sans);font-size:.78rem;font-weight:550;padding:8px 14px;border:1px solid var(--linegray);background:var(--panel);border-radius:6px 6px 0 0;border-bottom:0;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:7px}
+.demotabs button .dot{width:8px;height:8px;border-radius:50%}
+.demotabs button.on{color:var(--ink);background:#fff;box-shadow:inset 0 2.5px 0 var(--blueprint)}
+.demoframe{border:1px solid var(--linegray);border-radius:0 6px 6px 6px;background:#0c0f14;position:relative;overflow:hidden;min-height:590px;max-width:calc(var(--measure) + 40px)}
+.demoframe iframe{width:100%;height:590px;border:0;display:block}
+.demoload{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;color:#8ea0b5;font-family:var(--mono);font-size:.74rem;cursor:pointer}
+.demoload .btn{border:1px solid #2c3a4d;padding:10px 22px;border-radius:6px;color:#cfe0f2;background:#141b26;font-family:var(--sans);font-weight:600;font-size:.84rem}
+.demoload:hover .btn{border-color:var(--cyan)}
+.demometa{display:flex;justify-content:space-between;font-family:var(--sans);font-size:.74rem;color:var(--faint);padding:8px 2px 0;max-width:calc(var(--measure) + 40px);flex-wrap:wrap;gap:8px}
+
+/* code pipelines */
+.pipe{border:1px solid var(--linegray);border-radius:6px;background:#fff;margin:18px 0;max-width:calc(var(--measure) + 40px);overflow:hidden}
+.pipe .ph{padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--gridgray)}
+.pipe .ph .t{font-family:var(--sans);font-size:.84rem;font-weight:600}
+.pipe .ph .s{font-family:var(--mono);font-size:.64rem;color:var(--faint);margin-top:2px}
+.pipe .pb{padding:16px;overflow-x:auto}
+.flow{display:flex;gap:0;min-width:620px;align-items:stretch}
+.fnode{flex:1;border:1px solid var(--gridgray);border-radius:5px;background:var(--panel);padding:9px 11px}
+.fnode .fn{font-family:var(--mono);font-size:.66rem;font-weight:600;color:var(--blueprint)}
+.fnode .fd{font-family:var(--sans);font-size:.66rem;color:var(--muted);margin-top:3px;line-height:1.45}
+.farr{flex:none;width:26px;display:flex;align-items:center;justify-content:center;color:var(--faint)}
+.fstack{display:flex;flex-direction:column;gap:7px;flex:1}
+pre.cmd{background:var(--ink);color:#dbe6f2;border-radius:6px;padding:15px 18px;overflow-x:auto;font-family:var(--mono);font-size:.76rem;line-height:1.6;margin:16px 0;max-width:calc(var(--measure) + 40px)}
+pre.cmd .c{color:#7d94ad}
+
+/* references */
+ol.refs{max-width:calc(var(--measure) + 20px);margin-left:0;list-style:none;counter-reset:ref}
+ol.refs li{counter-increment:ref;position:relative;padding-left:44px;margin-bottom:12px;font-family:var(--sans);font-size:.84rem;color:var(--ink2);line-height:1.6}
+ol.refs li::before{content:"[" counter(ref) "]";position:absolute;left:0;font-family:var(--mono);font-size:.74rem;color:var(--blueprint);font-weight:600}
+.cite{font-family:var(--sans);font-size:.72em;vertical-align:super;color:var(--blueprint);font-weight:600}
+
+/* program record */
+.eventgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:24px 0;max-width:calc(var(--measure) + 40px)}
+@media(max-width:700px){.eventgrid{grid-template-columns:1fr}}
+.event{border:1px solid var(--linegray);border-radius:6px;overflow:hidden;background:#fff}
+.event img{width:100%;height:210px;object-fit:cover}
+.event .eb{padding:11px 15px}
+.event .ed{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--blueprint)}
+.event .en{font-family:var(--sans);font-size:.88rem;font-weight:600;margin-top:3px}
+
+/* colophon + footer */
+.colophon{border-top:1px solid var(--gridgray);margin-top:70px;padding-top:26px;font-family:var(--sans);font-size:.8rem;color:var(--muted);max-width:calc(var(--measure) + 20px)}
+.rv{opacity:0;transform:translateY(14px)}
+@media(prefers-reduced-motion:reduce){.rv{opacity:1;transform:none}}
+.tt{position:fixed;pointer-events:none;background:var(--ink);color:#eef3f9;font-family:var(--sans);font-size:.73rem;line-height:1.45;padding:7px 10px;border-radius:5px;box-shadow:0 4px 18px rgba(17,24,32,.28);opacity:0;transition:opacity .12s;z-index:90;max-width:250px}
+.tt .h{font-weight:600}
+.tt .mono{font-family:var(--mono);font-size:.66rem;color:#a9bccf}
+.legend{display:flex;flex-wrap:wrap;gap:13px;padding:9px 16px 0;font-family:var(--sans);font-size:.72rem;color:var(--muted)}
+.legend .it{display:flex;align-items:center;gap:6px}
+.legend .sw{width:10px;height:10px;border-radius:2px;flex:none}
+.chart text{font-family:var(--sans)}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<header class="doc"><div class="row">
+  <div class="id"><b>ECODROP</b> ┬╖ TECHNICAL RECORD ┬╖ REV. 2026-07</div>
+  <div class="pos" id="pos">┬º0 ┬╖ Front matter</div>
+  <div class="links">
+    <a href="gallery.html">Plates</a>
+    <a href="https://github.com/SquiddyScripts/ecodrop">Repository</a>
+  </div>
+</div></header>
+
+<div class="shell">
+<aside class="spine"><div class="in">
+  <div class="h">Contents</div>
+  <a href="#front" data-sec="front">Front matter</a>
+  <a href="#s1" data-sec="s1">┬º1&ensp;Problem &amp; prior art</a>
+  <a href="#s2" data-sec="s2">┬º2&ensp;Generation prototype</a>
+  <a class="l2" href="#s2-2">2.2&ensp;Component iteration record</a>
+  <a class="l2" href="#s2-3">2.3&ensp;Machine selection</a>
+  <a class="l2" href="#s2-4">2.4&ensp;Measured characterization</a>
+  <a href="#s3" data-sec="s3">┬º3&ensp;Storage architectures</a>
+  <a class="l2" href="#s3-1">3.1&ensp;Buoyancy</a>
+  <a class="l2" href="#s3-2">3.2&ensp;Halbach linear machine</a>
+  <a class="l2" href="#s3-3">3.3&ensp;Dual weight</a>
+  <a class="l2" href="#s3-4">3.4&ensp;Variable counterweight</a>
+  <a href="#s4" data-sec="s4">┬º4&ensp;Model &amp; protocol</a>
+  <a href="#s5" data-sec="s5">┬º5&ensp;Results &amp; statistics</a>
+  <a href="#s6" data-sec="s6">┬º6&ensp;Demonstrations</a>
+  <a href="#s7" data-sec="s7">┬º7&ensp;Computational apparatus</a>
+  <a href="#s8" data-sec="s8">┬º8&ensp;Applications</a>
+  <a href="#s9" data-sec="s9">┬º9&ensp;Program record</a>
+  <a href="#s10" data-sec="s10">┬º10&ensp;Provenance &amp; limits</a>
+  <a href="#refs" data-sec="refs">References</a>
+  <div class="fm">
+    <a href="gallery.html">Plates (photo record) Γåù</a>
+    <a href="lab/halbach.html">Demonstration lab Γåù</a>
+  </div>
+</div></aside>
+
+<main><div class="mw">
+
+<!-- ================= FRONT MATTER ================= -->
+<div class="front" id="front">
+  <div class="docline"><span>Document</span> ECODROP-TR-2026 <span>┬╖</span> <span>Class</span> ENGINEERING RESEARCH RECORD <span>┬╖</span> <span>Status</span> LIVING</div>
+  <h1>Gravitational Energy StorageΓÇôRegeneration Systems for Existing Infrastructure</h1>
+  <div class="subtitle">A measured weight-drop prototype, four candidate architectures, and their comparative simulation ΓÇö recorded with full iteration history</div>
+  <div class="authorrow">
+    <b>Amaan S. Khan</b> ┬╖ <b>Aiman Ullah</b> ┬╖ <b>Kavin Paturu Muralikrishnan</b>
+    <div class="aff">Chantilly High School, Virginia ┬╖ 2024 ΓÇô present</div>
+  </div>
+
+  <div class="abstract rv">
+    <div class="lbl">Abstract</div>
+    <p>This record evaluates the energy efficiency of four small-scale gravitational
+    storageΓÇôregeneration concepts ΓÇö buoyant displacement, electromagnetic assist (quasi-Halbach
+    tubular linear machine), dual-weight counterbalance, and variable counterweight ΓÇö using
+    MATLAB simulation with strict end-to-end energy bookkeeping, calibrated against a physically
+    built and instrumented generation prototype. Each design is modeled under identical baseline
+    conditions (50 kg effective mass, 3 m travel) and assessed by electrical energy generated
+    per drop, electrical energy required for lift, discharge efficiency, and per-channel loss
+    attribution. The variable-counterweight architecture attains the highest simulated discharge
+    efficiency (77.0 ┬▒ 0.5 %); one-way ANOVA establishes architecture as a significant factor
+    (F(3,36) = 6.10, p &lt; 0.001, ╬╖┬▓ = 0.337). The complete component iteration history ΓÇö
+    including rejected mechanisms ΓÇö is preserved here and in the source repository.</p>
+  </div>
+  <div class="kw"><b>Keywords ΓÇö</b> gravity battery ┬╖ energy storage ┬╖ regenerative elevator ┬╖ quasi-Halbach array ┬╖ tubular linear machine ┬╖ discharge efficiency ┬╖ engineering design process</div>
+
+  <div class="metatable rv">
+    <div class="r"><div class="k">Evidence classes</div><div class="v"><span class="pv m">MEASURED</span>&ensp;multimeter trials on the physical prototype&emsp;<span class="pv s">SIMULATED</span>&ensp;MATLAB, calibrated&emsp;<span class="pv c">IN&nbsp;DESIGN</span>&ensp;engineered, not yet built&emsp;<span class="pv x">REJECTED</span>&ensp;documented dead end</div></div>
+    <div class="r"><div class="k">Primary sources</div><div class="v">Engineering logbook (<code>documents/logbook/</code>) ┬╖ LaTeX reference (<code>four-systems-2025-26/latex/TECHNICAL_DOCUMENTATION.pdf</code>) ┬╖ simulation outputs (<code>matlab/outputs/*.csv</code>)</div></div>
+    <div class="r"><div class="k">Reproducibility</div><div class="v">All figures on this page are drawn from repository data; commands in ┬º7.3 regenerate the underlying results</div></div>
+    <div class="r"><div class="k">Citation</div><div class="v">Khan A.S., Ullah A., Paturu Muralikrishnan K. (2026). <i>EcoDrop: Gravitational Energy StorageΓÇôRegeneration Systems.</i> github.com/SquiddyScripts/ecodrop</div></div>
+  </div>
+</div>
+
+<!-- ================= ┬º1 PROBLEM ================= -->
+<section class="sec" id="s1">
+  <h2>Problem statement and prior art</h2>
+  <p>Intermittent renewable generation must be decoupled from consumption, and the dominant
+  storage answer ΓÇö electrochemical batteries ΓÇö carries energy-intensive mining, toxic disposal,
+  and per-cycle chemical degradation<span class="snref"></span>. Gravity storage stores energy in
+  the position of a mass: mechanically simple, chemically inert, and effectively unlimited in
+  cycle life. At grid scale it already works ΓÇö pumped hydro achieves 70ΓÇô85 % round-trip
+  efficiency<a class="cite" href="#refs">[5]</a>, and dry-mass systems from Energy Vault and
+  Gravitricity, underground shaft concepts<a class="cite" href="#refs">[3]</a>, and piston
+  designs<a class="cite" href="#refs">[2,6]</a> are commercial or near-commercial.</p>
+  <span class="sn">Lithium-ion round-trip efficiency is high (85ΓÇô92 %) ΓÇö the argument against it here is not efficiency but chemistry: extraction, degradation, and disposal.</span>
+  <p>The unsolved case is <i>small scale</i>. Grid-scale gravity plants are location-bound and
+  capital-heavy; the literature identifies buildings themselves as the untapped medium ΓÇö Lift
+  Energy Storage Technology proposes elevator-borne mass transport in high-rises<a class="cite" href="#refs">[4]</a>,
+  and elevator regenerative drives with ultracapacitor buffering are an active research
+  area<a class="cite" href="#refs">[7,8,9]</a>. This project asks the question those threads
+  point toward but do not answer:</p>
+  <div class="lbx"><div class="t">Research question ┬╖ research plan, 2025ΓÇô26</div>
+  <p>What viable gravitational storageΓÇôregeneration systems can be implemented in the real
+  world ΓÇö inside existing infrastructure ΓÇö and which architecture recovers the largest fraction
+  of the energy invested in lifting?</p></div>
+  <p>The program proceeded in the only defensible order: first build and measure a physical
+  generation prototype to ground every loss model in instrument data (┬º2); then design candidate
+  architectures with full iteration discipline (┬º3); then compare them under identical simulated
+  conditions with statistical inference (┬º4ΓÇô┬º5).</p>
+</section>
+
+<!-- ================= ┬º2 PROTOTYPE ================= -->
+<section class="sec" id="s2">
+  <h2>The generation prototype <span class="pv m" style="vertical-align:6px">MEASURED</span></h2>
+
+  <h3 class="sub" id="s2-1">System architecture</h3>
+  <p>The prototype converts gravitational potential energy to electrical energy through a
+  five-stage mechanical chain: barbell masses tied to polypropylene rope, redirected by a
+  pulley, wound on a drum, geared up, and delivered to a DC machine operating as a
+  generator. A ~9-foot wooden scaffold frame carries the drop path; a weight box constrains
+  lateral sway<span class="snref"></span>.</p>
+  <span class="sn">Lateral swaying during early drop trials measurably reduced energy transfer to the drum ΓÇö the weight-box enclosure was itself an iteration response, not part of the first design.</span>
+
+  <figure class="artifact rv">
+    <div class="head"><span class="no"></span><span class="pv m">MEASURED SYSTEM</span><span class="src">documents/logbook ┬╖ Part I</span></div>
+    <div class="payload"><img src="assets/img/lb_architecture.jpg" alt="Prototype architecture: masses, rope, pulley, hoist drum, gearbox, generator"></div>
+    <figcaption><b>Generation-model architecture.</b> Barbell masses ΓåÆ polypropylene rope ΓåÆ block-and-tackle (later a single redirecting pulley) ΓåÆ modified spool / hoist drum ΓåÆ gearbox ΓåÆ DC generator. Reproduced from the engineering logbook.</figcaption>
+  </figure>
+
+  <h3 class="sub" id="s2-2">Component iteration record</h3>
+  <p class="nojust">The logbook records every configuration tried, its failure mode, and the engineering
+  response. The record below is condensed but complete ΓÇö nothing that failed is omitted,
+  because the failures carry the design rationale.</p>
+
+  <h4>Gearbox ΓÇö four generations</h4>
+  <div class="iter rejected rv"><div class="ih"><span class="it-no">Iteration 1</span><span class="it-name">Compound gearbox, Vex/Lego components</span><span class="verdict">SUPERSEDED</span><span class="cost">~$15</span></div>
+    <div class="ib">A ~200-tooth gear meshing an ~18-tooth pinion at small module size.
+    <span class="fl bad">Failure mode</span>Gear slippage under load; meshing gaps produced dropouts in the generation output.
+    <span class="fl good">Response</span>Increase tooth thickness and module; move to a stackable architecture with proper bearings.</div></div>
+  <div class="iter rejected rv"><div class="ih"><span class="it-no">Iteration 2</span><span class="it-name">Compound stackable spur gearbox</span><span class="verdict">SUPERSEDED</span><span class="cost">~$10</span></div>
+    <div class="ib">Laser-cut wooden structure, progressive RPM amplification across stages, ball bearings at key shafts.
+    <span class="fl bad">Limitation</span>Functioned, but spur-contact losses across multiple stages capped efficiency below target.</div></div>
+  <div class="iter rejected rv"><div class="ih"><span class="it-no">Iteration 3</span><span class="it-name">Planetary gearbox</span><span class="verdict">REJECTED</span><span class="cost">~$18</span></div>
+    <div class="ib">Evaluated for its torque-and-speed amplification in a compact stack (the drill-gearbox architecture).
+    <span class="fl bad">Why rejected</span>High frictional losses inherent to the geometry; prototype-scale build complexity; net gain did not justify it.</div></div>
+  <div class="iter final rv"><div class="ih"><span class="it-no">Iteration 4</span><span class="it-name">Double-helix spur gearbox</span><span class="verdict">FINAL</span><span class="cost">~$13</span></div>
+    <div class="ib">Double-helix spur gears engineered for high speed and load; polycarbonate gear material.
+    <span class="fl good">Key changes</span>Round dowel shafts (torque fluctuation from non-circular sections) ΓåÆ aluminum hex shafts; standard ball bearings ΓåÆ angular-contact bearings (the load has both radial and axial components); dual hinge shaft collars restrict lateral gear movement under load. Teflon washers and polycarbΓÇônylon composite under evaluation.</div></div>
+
+  <figure class="artifact rv">
+    <div class="head"><span class="no"></span><span class="pv m">BUILD RECORD</span><span class="src">documents/logbook/figures</span></div>
+    <div class="payload"><div class="imgsplit three">
+      <div><img src="assets/img/lb_gearbox_v1.jpg" alt="Gearbox iteration 1 ΓÇö Vex/Lego"><div class="sub-lbl">(a) iteration 1 ΓÇö Vex/Lego compound</div></div>
+      <div><img src="assets/img/lb_gearbox_v2.jpg" alt="Gearbox iteration 2 ΓÇö stackable spur"><div class="sub-lbl">(b) iteration 2 ΓÇö stackable spur</div></div>
+      <div><img src="assets/img/lb_gearbox_final.jpg" alt="Final double-helix gearbox"><div class="sub-lbl">(c) iteration 4 ΓÇö double-helix, final</div></div>
+    </div></div>
+    <figcaption><b>Gearbox lineage.</b> The two intermediate failures are retained in the record; each drove a specific, articulable change in the next design.</figcaption>
+  </figure>
+
+  <h4>Mechanical connections</h4>
+  <p>Custom 3D-printed PLA couplers (Γëê$0.50) joined spool-to-gearbox and gearbox-to-machine in
+  the first build. Slight axial misalignment multiplied torque demand under load; couplers
+  vibrated and failed. The industry-derived response replaced couplers entirely: a
+  <b>chainΓÇôsprocket stage</b> (FRC robotics practice for high-load transmission) at
+  spool-to-gearbox, and a <b>1:1 bevel-gear right-angle stage</b> at gearbox-to-machine ΓÇö
+  tolerant of misalignment and tunable in ratio<span class="snref"></span>.</p>
+  <span class="sn">The bevel stage adds friction but buys a necessary 90┬░ redirection of the rotational axis ΓÇö an accepted, documented trade.</span>
+
+  <h4>Rope winding ΓÇö spool to hoist drum</h4>
+  <div class="iter rejected rv"><div class="ih"><span class="it-no">Iteration 1</span><span class="it-name">Modified weed-whacker spool</span><span class="verdict">SUPERSEDED</span><span class="cost">~$12.50</span></div>
+    <div class="ib"><span class="fl bad">Failure mode</span>A trimmer spool stores line; it does not control unwinding. Under dynamic load: tangling, inconsistent tension, no bearings.
+    <span class="fl good">Response</span>Research into industrial lifting hardware identified the distinction that matters ΓÇö a <b>hoist drum</b> carries cleats, grooves matched to the rope profile that enforce a standard winding path.</div></div>
+  <div class="iter final rv"><div class="ih"><span class="it-no">Iteration 2</span><span class="it-name">Cleated hoist drum (Onshape) + rope guide</span><span class="verdict">FINAL</span></div>
+    <div class="ib">A cleat structure designed in Onshape and fitted over the existing spool geometry, plus an industrial-style rope guide. Tangling eliminated in both winding directions. Re-printed and refined again in the 2026 rebuild.</div></div>
+
+  <figure class="artifact rv">
+    <div class="head"><span class="no"></span><span class="pv m">BUILD RECORD</span><span class="src">documents/logbook/figures ┬╖ photos/build</span></div>
+    <div class="payload"><div class="imgsplit three">
+      <div><img src="assets/img/lb_spool.jpg" alt="Weed-whacker spool, iteration 1"><div class="sub-lbl">(a) trimmer spool, iteration 1</div></div>
+      <div><img src="assets/img/lb_hoistdrum.jpg" alt="Cleated hoist drum design"><div class="sub-lbl">(b) cleated drum design</div></div>
+      <div><img src="assets/img/drum_motor.jpg" alt="Drum coupled to BLDC machine on the rig"><div class="sub-lbl">(c) drumΓÇômachine drivetrain, as built</div></div>
+    </div></div>
+    <figcaption><b>Winding mechanism lineage.</b> The cleat geometry is the load-bearing idea: it converts a storage device into a controlled-unwinding device.</figcaption>
+  </figure>
+
+  <h4>Pulley system and weight stabilization</h4>
+  <p>The block-and-tackle used for mechanical advantage introduced one friction point per
+  sheave; the final configuration simplifies to a <b>single redirecting pulley</b> (Γëê$27.50
+  including rigging) with grease at the rope contact. Drop trials exposed lateral sway that
+  bled energy from the descent; the response was a <b>weight-box enclosure</b> constraining
+  the mass to vertical translation.</p>
+
+  <h3 class="sub" id="s2-3">Machine selection</h3>
+  <p>The first generator ΓÇö a brushed DC unit (Γëê$17.25) ΓÇö lost output to brush friction, brush
+  wear, and high internal resistance. Selection of its replacement was done with a consulted
+  motor engineer against the application's defining constraint: <b>gravitational drop speeds
+  are low</b>, so the machine must produce usable voltage at low shaft speed ΓÇö high stall
+  torque, low K<sub>v</sub>, minimal internal resistance. No inrunner met the combined
+  requirement; the survey settled on an outrunner<span class="snref"></span>.</p>
+  <span class="sn">K<sub>t</sub> is derived, not quoted: K<sub>t</sub> = 60Γüä(2╧ÇK<sub>v</sub>) ΓÇö see Eq. (4). The Aerodrive line is rated for industrial drone propulsion.</span>
+
+  <div class="artifact tblwrap rv">
+    <div class="head"><span class="no"></span><span class="pv m">SELECTED COMPONENT</span><span class="src">documents/logbook ┬╖ Part I</span></div>
+    <div class="payload tight"><table class="data">
+      <tr><th>Parameter</th><th>Value</th><th>Parameter</th><th>Value</th></tr>
+      <tr><td>Machine</td><td><b>Turnigy Aerodrive SK3-5065-236KV</b> (BLDC outrunner)</td><td>Poles / slots</td><td class="num">14P / 12N</td></tr>
+      <tr><td>K<sub>v</sub></td><td class="num">236 rpm┬╖VΓü╗┬╣</td><td>Max continuous current</td><td class="num">60 A</td></tr>
+      <tr><td>R<sub>m</sub> (phaseΓÇôphase)</td><td class="num">19 m╬⌐</td><td>Max power</td><td class="num">1 850ΓÇô2 000 W</td></tr>
+      <tr><td>K<sub>t</sub> (derived)</td><td class="num">Γëê 0.0405 N┬╖m┬╖AΓü╗┬╣</td><td>Mass</td><td class="num">530 g</td></tr>
+      <tr><td>Est. operating efficiency</td><td class="num">85ΓÇô92 % (mid-range point)</td><td>Bearings</td><td>double-shielded + front support</td></tr>
+    </table></div>
+    <div class="cap"><b>Machine specification.</b> The same machine model parameterizes every simulation in ┬º4ΓÇô┬º5, closing the loop between hardware and model.</div>
+  </div>
+
+  <h3 class="sub" id="s2-4">Measured characterization</h3>
+  <p>Drop trials at four mass levels (10, 15, 20, 25 kg; three trials each; Γëê2.5 m drop)
+  were instrumented with a multimeter. Efficiency rises with mass because fixed friction
+  terms amortize over a larger gravitational input ΓÇö peak <b>28.7 % end-to-end at 25 kg</b>
+  (8.23 V mean, Γëê45 W average electrical output)<span class="snref"></span>.</p>
+  <span class="sn">Recorded drop height varies across primary documents (2 m plan / 2.5 m analysis / 2.7 m logbook) ΓÇö the frame was rebuilt more than once. Flagged in ┬º10, not silently reconciled.</span>
+
+  <figure class="artifact rv">
+    <div class="head"><span class="no"></span><span class="pv m">MEASURED</span><span class="src">prototype-2024-25/data/measured_results.csv</span></div>
+    <div class="payload"><svg class="chart" id="chMeasured" viewBox="0 0 680 300" role="img" aria-label="Measured voltage and efficiency versus mass"></svg></div>
+    <figcaption><b>Prototype characterization.</b> Mean output voltage (left) and end-to-end efficiency (right) vs. dropped mass; three multimeter trials per level. These curves are the calibration target for every loss parameter in the ┬º4 model.</figcaption>
+  </figure>
+</section>
+
+<!-- ================= ┬º3 ARCHITECTURES ================= -->
+<section class="sec" id="s3">
+  <h2>Four storageΓÇôregeneration architectures <span class="pv s" style="vertical-align:6px">SIMULATED</span> <span class="pv c" style="vertical-align:6px">IN DESIGN</span></h2>
+  <p>With the generation chain validated, the design space forked: where in the built world do
+  masses already rise and fall, and which lifting mechanism wastes the least of what it
+  stores? Four architectures were carried to full design. Their iteration records ΓÇö including
+  the concepts each one killed ΓÇö follow. A fifth concept, a street-lamp gravity battery,
+  was designed and dropped before simulation<span class="snref"></span>.</p>
+  <span class="sn">The street-lamp branch survives only in correspondence (documents/notes) ΓÇö an honest artifact of scope narrowing in fall 2025.</span>
+
+  <h3 class="sub" id="s3-1">Buoyancy system ΓÇö storage</h3>
+  <p>Energy is stored by lifting the mass with Archimedes' force rather than a motor: flood a
+  chamber, and a flotation body strapped to the mass rises; drain it, and the mass descends
+  through the generation chain. The lift force follows Eq. (5) below.</p>
+  <div class="iter rejected rv"><div class="ih"><span class="it-no">Iteration 1</span><span class="it-name">Bottom-pump chamber, pneumatic release</span><span class="verdict">REJECTED</span></div>
+    <div class="ib"><span class="fl bad">Why rejected</span>Pneumatically actuated drain ports added cost and complexity disproportionate to function.</div></div>
+  <div class="iter rejected rv"><div class="ih"><span class="it-no">Iteration 2</span><span class="it-name">Three-chamber configuration</span><span class="verdict">SUPERSEDED</span></div>
+    <div class="ib">Two side reservoirs pump into a central travel chamber; trapdoor return.
+    <span class="fl bad">Limitation</span>Functional but inefficient; trapdoor control complexity.</div></div>
+  <div class="iter final rv"><div class="ih"><span class="it-no">Iteration 3</span><span class="it-name">Dual-layer chamber</span><span class="verdict">FINAL DESIGN</span></div>
+    <div class="ib">Upper reservoir floods an outer chamber; water enters the inner travel chamber only through a bottom gap, so buoyant force develops <i>without wetting rope or mass</i> ΓÇö wet rope raises friction sharply and wood swells. Three in-path turbines harvest the falling water; a check-valved vertical pump recharges the upper reservoir.
+    <span class="fl good">Sub-problem solved</span>Buoyant lift puts the rope in compression (it can only carry tension) ΓÇö a high-torque idler between pulley and drum maintains active tension through the lift phase.</div></div>
+  <figure class="artifact rv">
+    <div class="head"><span class="no"></span><span class="pv c">IN DESIGN</span><span class="src">documents/logbook ┬╖ Part II</span></div>
+    <div class="payload"><div class="imgsplit">
+      <div><img src="assets/img/lb_buoyancy1.jpg" alt="Dual-layer buoyancy chamber design"><div class="sub-lbl">(a) dual-layer chamber</div></div>
+      <div><img src="assets/img/lb_buoyancy2.jpg" alt="Buoyancy charge/discharge cycle"><div class="sub-lbl">(b) chargeΓÇôdischarge cycle</div></div>
+    </div></div>
+    <figcaption><b>Buoyancy storage system, final design.</b> Logbook drawings; simulated in ┬º5, not yet built.</figcaption>
+  </figure>
+
+  <h3 class="sub" id="s3-2">Halbach tubular linear machine ΓÇö storage, electromagnetic</h3>
+  <p>The electromagnetic branch asks whether the lifting chain can be removed entirely: no
+  rope, no drum, no gearbox on the way up. Its iteration record is the project's longest
+  chain of rejected concepts.</p>
+  <div class="iter rejected rv"><div class="ih"><span class="it-no">Iteration 1</span><span class="it-name">Fixed electromagnet pair, top and bottom</span><span class="verdict">REJECTED</span></div>
+    <div class="ib"><span class="fl bad">Why rejected</span>Field strength must scale with the full travel column ΓÇö electromagnet size and cost scale prohibitively, and a static field cannot adapt to variable load.</div></div>
+  <div class="iter rejected rv"><div class="ih"><span class="it-no">Iteration 2</span><span class="it-name">Weight-as-electromagnet (soft-iron core, wound)</span><span class="verdict">REJECTED</span></div>
+    <div class="ib"><span class="fl bad">Why rejected</span>Manufacturing a massive wound electromagnet is exactly the cost structure commercial gravity storage avoids ΓÇö Energy Vault's masses are compacted waste material for a reason.</div></div>
+  <div class="iter rejected rv"><div class="ih"><span class="it-no">Iteration 3</span><span class="it-name">Flat linear motor</span><span class="verdict">REJECTED</span></div>
+    <div class="ib">Linear motors convert electrical energy directly to translation (maglev propulsion), skipping the rotary-to-linear stage of a linear actuator.
+    <span class="fl bad">Why rejected</span>Planar geometry leaks flux and cannot develop the required thrust density for vertical mass lifting.</div></div>
+  <div class="iter final rv"><div class="ih"><span class="it-no">Iteration 4</span><span class="it-name">Tubular linear machine, T-shaped quasi-Halbach magnetization</span><span class="verdict">FINAL DESIGN ┬╖ ACTIVE</span></div>
+    <div class="ib">Cylindrical Halbach arrays concentrate flux toward the bore (Γëê1.2 T), and finite-element results in the literature show T-shaped and trapezoidal quasi-Halbach magnet structures superior to rectangular PMs in thrust force, power density, and cogging<a class="cite" href="#refs">[1]</a>. Final architecture: four tubular linear machines on the mass's shell; inward-pointing T-shaped Halbach rails; six-phase stacked coil arrangement; contact-free travel.
+    <span class="fl good">Status</span>The current research direction (┬º8); lowest simulated efficiency in ┬º5, retained for its controllability and mechanical simplicity.</div></div>
+
+  <div class="lbx rv"><div class="t">Theoretical extension ΓÇö recorded and self-corrected ┬╖ logbook, Part III</div>
+    <p>A descent concept combining gravitational and eddy-current forces was explored on paper ΓÇö
+    cutting translator excitation at top-of-stroke so the falling conductor generates through the
+    Halbach field. The logbook itself notes the correction: the eddy interaction <i>brakes</i>
+    descent rather than accelerating it, and no configuration returns more than was stored.
+    Retained as a documented exploration, marked <span class="pv x" style="vertical-align:1px">REJECTED</span>.</p></div>
+
+  <figure class="artifact rv">
+    <div class="head"><span class="no"></span><span class="pv s">COMPUTED</span><span class="src">interactive-demos/halbach-viz ┬╖ physics/halbach_field.py</span></div>
+    <div class="payload"><div class="imgsplit">
+      <div><img src="assets/img/fig_halbach_flux.jpg" alt="Computed flux concentration of the quasi-Halbach ring array"><div class="sub-lbl">(a) flux concentration toward the bore</div></div>
+      <div><img src="assets/img/halbach_cycle.gif" alt="Animated chargeΓÇôdischarge cycle of the Halbach system"><div class="sub-lbl">(b) chargeΓÇôdischarge cycle, animated model</div></div>
+    </div></div>
+    <figcaption><b>Halbach field model.</b> Python/matplotlib computation of the ring-array field and the cycle animation driving the ┬º6 demonstration telemetry.</figcaption>
+  </figure>
+
+  <h3 class="sub" id="s3-3">Dual-weight system ΓÇö regenerative</h3>
+  <p>Traction elevators already contain the mechanism: cab and counterweight coupled over a
+  sheave, counterweight sized near 50 % of rated cab load. The dual-weight system applies the
+  machine-room topology directly ΓÇö two hoist drums on a common shaft, ropes wound in
+  opposition, one BLDC machine generating on <i>both</i> directions of travel. Two variants
+  are recorded: an elevator-integration model (retrofit generation module, polarity-switched
+  on cab direction ΓÇö the commercial analogue is the regenerative drive<a class="cite" href="#refs">[7,9]</a>)
+  and the free-standing simulation model used in ┬º5<span class="snref"></span>.</p>
+  <span class="sn">Key insight from the logbook: with matched masses, the descending weight lifts the ascending one ΓÇö the machine pays only imbalance plus friction. That observation is the seed of ┬º3.4.</span>
+  <figure class="artifact rv">
+    <div class="head"><span class="no"></span><span class="pv c">IN DESIGN</span><span class="src">documents/logbook ┬╖ Part IV ┬╖ cad/team</span></div>
+    <div class="payload"><div class="imgsplit">
+      <div><img src="assets/img/lb_dual1.jpg" alt="Dual weight system logbook drawing"><div class="sub-lbl">(a) logbook mechanism drawing</div></div>
+      <div><img src="assets/img/cad_hoistway.jpg" alt="Guide rail and hoistway CAD"><div class="sub-lbl">(b) guide rail + hoistway, Onshape (K. PM)</div></div>
+    </div></div>
+    <figcaption><b>Dual-weight regeneration system.</b> A self-locking hold mechanism (controlled release between cycles) remains an open design item.</figcaption>
+  </figure>
+
+  <h3 class="sub" id="s3-4">Variable counterweight ΓÇö regenerative, highest-performing</h3>
+  <p>The variable counterweight was not conceived as a battery. It emerged from elevator
+  counterweight sizing research: real counterweights are optimized per building ΓÇö height,
+  traffic pattern, rated load ΓÇö not fixed at 50 %. If a counterweight can be optimized
+  <i>statically</i>, it can be matched <i>dynamically</i>: sensors read the primary load, and
+  modular masses deploy or retract to bring net imbalance toward zero, so the machine supplies
+  only friction and residual imbalance on every ascent.</p>
+  <p>The mechanism has two mass populations: a <b>primary cabled mass</b> on the generation
+  chain, and <b>modular magnetic barbell masses</b> ΓÇö each wound with electromagnet coils for
+  docking, each carrying guide-roller generators that charge onboard supercapacitors during
+  module descent, discharged to the building bus at the docking checkpoint. Secondary
+  recovery on top of primary generation<span class="snref"></span>.</p>
+  <span class="sn">Module electronics (supercapacitor bank, low-dropout regulator) are engineered on paper only ΓÇö the whole architecture is <b>simulated + CAD</b>, and ┬º10 lists it among unbuilt claims.</span>
+  <figure class="artifact rv">
+    <div class="head"><span class="no"></span><span class="pv c">IN DESIGN</span><span class="src">documents/logbook ┬╖ Part V ┬╖ cad/team (Onshape, K. PM 2025)</span></div>
+    <div class="payload"><div class="imgsplit">
+      <div><img src="assets/img/lb_vcw1.jpg" alt="Variable counterweight logbook design"><div class="sub-lbl">(a) logbook design drawing</div></div>
+      <div><img src="assets/img/cad_vcw.jpg" alt="Variable counterweight CAD, Onshape"><div class="sub-lbl">(b) mechanism CAD, Onshape</div></div>
+    </div></div>
+    <figcaption><b>Variable-counterweight system.</b> Modular mass deployment against the primary cabled mass; highest simulated discharge efficiency of the four (┬º5).</figcaption>
+  </figure>
+</section>
+
+<!-- ================= ┬º4 MODEL ================= -->
+<section class="sec" id="s4">
+  <h2>Mathematical model and simulation protocol</h2>
+  <p>All four architectures share one physics core; each contributes a system-specific loss
+  channel on top. Bookkeeping is end-to-end and resolved per timestep ΓÇö loss terms are
+  functions of instantaneous velocity, not static averages applied after the fact.</p>
+
+  <div class="eqn rv"><div class="k">$$E_g \;=\; m\,g\,\Delta h$$</div><div class="no"></div></div>
+  <div class="eqn rv"><div class="k">$$\mathrm{DE} \;=\; \frac{\displaystyle\int_{0}^{t_d} V(t)\,I(t)\,\mathrm{d}t}{m\,g\,\Delta h}\times 100\,\%$$</div><div class="no"></div></div>
+  <div class="eqn rv"><div class="k">$$J_{\mathrm{eff}}\,\dot{\omega} \;=\; \frac{T_{\mathrm{load}}}{N}\;-\;T_{\mathrm{fric}}(\omega)\;-\;K_t\,I,\qquad J_{\mathrm{eff}} \;=\; J_m+\sum_i \frac{J_i}{\eta_i\,N_i^{2}}$$</div><div class="no"></div></div>
+  <div class="eqn rv"><div class="k">$$V \;=\; K_e\,\omega_m-I\,R_m,\qquad K_t \;=\; \frac{60}{2\pi\,K_v}\;\approx\;0.0405\ \mathrm{N\,m\,A^{-1}}$$</div><div class="no"></div></div>
+  <div class="eqn rv"><div class="k">$$F_b \;=\; \rho_{\mathrm{w}}\,V_{\mathrm{disp}}\,g \;-\; m g \;-\; F_{\mathrm{drag}}(v)$$</div><div class="no"></div></div>
+
+  <p class="nojust" style="font-family:var(--sans);font-size:.82rem;color:var(--muted);max-width:calc(var(--measure) + 20px)">
+  (1) stored energy per cycle ΓÇö 1 471.5 J at the 50 kg / 3 m baseline, identical across systems ┬╖
+  (2) discharge efficiency, the primary metric (also the metric used to rate pumped hydro and Li-ion, enabling ┬º5's benchmark comparison) ┬╖
+  (3) rotational dynamics integrated by <code>ode45</code>, inertias reflected through gear stages ┬╖
+  (4) machine model of the SK3-5065 (Table 1) ┬╖
+  (5) net buoyant lift in the ┬º3.1 chamber.</p>
+
+  <h3 class="sub">Protocol</h3>
+  <ol class="man">
+    <li><b>Common baseline.</b> 50 kg effective mass, 3 m travel, identical drum, gear ratio, rope, and machine model across all four systems; only the architecture differs.</li>
+    <li><b>Calibration.</b> Friction coefficients and machine efficiency fitted to the ┬º2.4 multimeter data before any comparison was run.</li>
+    <li><b>System-specific losses.</b> Variable CW: mass-transfer energy cost; dual weight: drum friction and rope routing; buoyancy: fluid drag and pump work; Halbach: coil and braking resistance.</li>
+    <li><b>Replication.</b> 10 runs per system with machine efficiency perturbed ┬▒2 % and friction ┬▒5 %, representing run-to-run uncertainty.</li>
+    <li><b>Inference.</b> One-way ANOVA across systems on discharge efficiency and net energy per cycle; effect size by ╬╖┬▓.</li>
+    <li><b>Sensitivity.</b> All friction parameters swept ┬▒20 %; ranking invariance checked.</li>
+  </ol>
+</section>
+
+<!-- ================= ┬º5 RESULTS ================= -->
+<section class="sec" id="s5">
+  <h2>Results and statistical analysis <span class="pv s" style="vertical-align:6px">SIMULATED</span></h2>
+
+  <figure class="artifact rv">
+    <div class="head"><span class="no"></span><span class="pv s">SIMULATED</span><span class="src">matlab/outputs/presentation_replicates.csv ┬╖ 40 runs</span></div>
+    <div class="payload"><svg class="chart" id="chDE" viewBox="0 0 860 330" role="img" aria-label="Discharge efficiency by architecture with benchmark ranges"></svg></div>
+    <figcaption><b>Discharge efficiency by architecture.</b> Mean of 10 perturbed replicates per system; whiskers ┬▒ 1 SD. Shaded bands: benchmark ranges for pumped hydro (70ΓÇô85 %) and Li-ion (85ΓÇô92 %)<a class="cite" href="#refs">[5]</a>. The variable counterweight enters the pumped-hydro band.</figcaption>
+  </figure>
+
+  <figure class="artifact rv">
+    <div class="head"><span class="no"></span><span class="pv s">SIMULATED</span><span class="src">matlab/outputs/loss_breakdown_figures.csv</span></div>
+    <div class="payload"><svg class="chart" id="chLoss" viewBox="0 0 860 330" role="img" aria-label="Energy loss per cycle by channel and architecture"></svg></div>
+    <div class="legend" id="lossLegend"></div>
+    <figcaption><b>Per-channel loss attribution.</b> Losses ordered by drivetrain position (rope ΓåÆ bearing ΓåÆ gearbox ΓåÆ machine ΓåÆ system-specific). The ranking mechanism is visible: regenerative architectures nearly eliminate the system-specific channel that dominates the storage systems.</figcaption>
+  </figure>
+
+  <div class="artifact tblwrap rv">
+    <div class="head"><span class="no"></span><span class="pv s">SIMULATED</span><span class="src">backboard summary ┬╖ matlab/outputs</span></div>
+    <div class="payload tight"><table class="data">
+      <tr><th>System</th><th>Class</th><th>DE (mean ┬▒ SD)</th><th>E<sub>out</sub>/cycle</th><th>Net E/cycle</th><th>Cycle time</th><th>Cycles ΓåÆ 1 kWh</th></tr>
+      <tr><td><b style="color:#2a78d6">Γûá</b> Variable counterweight</td><td>regen.</td><td class="num"><b>77.0 ┬▒ 0.5 %</b></td><td class="num">1 133 J</td><td class="num">ΓêÆ0.1 kJ</td><td class="num">8.0 s</td><td class="num">3 177</td></tr>
+      <tr><td><b style="color:#1baf7a">Γûá</b> Dual weight</td><td>regen.</td><td class="num">60.0 ┬▒ 1.2 %</td><td class="num">883 J</td><td class="num">ΓêÆ0.6 kJ</td><td class="num">6.0 s</td><td class="num">4 077</td></tr>
+      <tr><td><b style="color:#eda100">Γûá</b> Buoyancy</td><td>storage</td><td class="num">39.5 ┬▒ 1.8 %</td><td class="num">581 J</td><td class="num">ΓêÆ2.8 kJ</td><td class="num">46.2 s</td><td class="num">6 196</td></tr>
+      <tr><td><b style="color:#008300">Γûá</b> Halbach linear</td><td>storage</td><td class="num">27.0 ┬▒ 2.1 %</td><td class="num">397 J</td><td class="num">ΓêÆ3.3 kJ</td><td class="num">9.7 s</td><td class="num">9 068</td></tr>
+    </table></div>
+    <div class="cap"><b>Summary of record.</b> All net energies are negative ΓÇö thermodynamically required ΓÇö and rank-ordered by how much of the lift investment each architecture returns.</div>
+  </div>
+
+  <p><b>Inference.</b> One-way ANOVA across the four systems: discharge efficiency
+  F(3,36) = 6.10, p &lt; 0.001, ╬╖┬▓ = 0.337; net energy per cycle F(3,36) = 5.95,
+  p &lt; 0.001, ╬╖┬▓ Γëê 0.331. Architecture explains roughly a third of observed variance;
+  the ranking is stable under the ┬º4 sensitivity sweep (┬▒20 % friction)<span class="snref"></span>.</p>
+  <span class="sn">Replicate-level data for both metrics ships in the repository; the ANOVA is recomputable from <code>presentation_replicates.csv</code> in one script.</span>
+  <p><b>Interpretation.</b> Discharge efficiency is set by how much net work the machine must
+  do against gravity per cycle. The variable counterweight drives net imbalance toward zero and
+  therefore reduces its loss budget to drivetrain friction (305 J/cycle); the buoyancy and
+  Halbach systems pay a full lift-energy toll through pumping and coil losses respectively
+  (1 680 and 3 100 J/cycle). The gap compounds linearly with cycling.</p>
+</section>
+
+<!-- ================= ┬º6 DEMOS ================= -->
+<section class="sec" id="s6">
+  <h2>Interactive demonstrations</h2>
+  <p>Each architecture has a browser demonstration (Three.js) whose motion is driven by the
+  corresponding cycle model ΓÇö the Halbach scene runs a live JavaScript port of the ┬º4 physics
+  with telemetry readout. Select a system; scenes are 2ΓÇô6 MB and load on demand.</p>
+  <div class="demotabs" id="demoTabs">
+    <button data-src="lab/elevator-variable.html" class="on"><span class="dot" style="background:#2a78d6"></span>Variable counterweight</button>
+    <button data-src="lab/elevator-dual.html"><span class="dot" style="background:#1baf7a"></span>Dual weight</button>
+    <button data-src="lab/buoyancy.html"><span class="dot" style="background:#eda100"></span>Buoyancy</button>
+    <button data-src="lab/halbach.html"><span class="dot" style="background:#008300"></span>Halbach</button>
+  </div>
+  <div class="demoframe" id="demoFrame">
+    <div class="demoload" id="demoLoad"><div class="btn">Γû╢&ensp;Load demonstration</div><div>~2ΓÇô6 MB ┬╖ WebGL ┬╖ desktop recommended</div></div>
+  </div>
+  <div class="demometa"><span>drag to orbit ┬╖ scroll to zoom ┬╖ panels show live cycle state</span><span><a id="demoNew" href="lab/elevator-variable.html" target="_blank" rel="noopener">open full-page Γåù</a></span></div>
+</section>
+
+<!-- ================= ┬º7 APPARATUS ================= -->
+<section class="sec" id="s7">
+  <h2>Computational apparatus</h2>
+  <h3 class="sub">Simulation pipelines</h3>
+  <p>Two MATLAB codebases exist deliberately. Pipeline B (January 2026) is the full
+  electromechanical ODE framework, documented file-by-file in the LaTeX reference
+  <a href="https://github.com/SquiddyScripts/ecodrop/blob/main/four-systems-2025-26/latex/TECHNICAL_DOCUMENTATION.pdf"><code>TECHNICAL_DOCUMENTATION.pdf</code></a>.
+  Pipeline A (March 2026) is the rebuilt, calibrated comparison pipeline whose outputs are the
+  ┬º5 results of record.</p>
+
+  <div class="pipe rv"><div class="ph"><div class="t">Pipeline A ΓÇö comparison pipeline (results of record)</div><div class="s">four-systems-2025-26/simulation-four-systems/matlab/</div></div>
+    <div class="pb"><div class="flow">
+      <div class="fnode"><div class="fn">config.m</div><div class="fd">constants ┬╖ machine spec ┬╖ protocol</div></div><div class="farr">ΓåÆ</div>
+      <div class="fnode"><div class="fn">physics_core.m</div><div class="fd">PE, friction, gearbox &amp; machine losses; descent ODE (ode45) ΓÇö Eq. (1)ΓÇô(4)</div></div><div class="farr">ΓåÆ</div>
+      <div class="fstack">
+        <div class="fnode"><div class="fn">systems/run_cycle_variable_cw.m</div><div class="fd">+ mass-transfer cost</div></div>
+        <div class="fnode"><div class="fn">systems/run_cycle_dual_weight.m</div><div class="fd">+ drum friction, routing</div></div>
+        <div class="fnode"><div class="fn">systems/run_cycle_buoyancy.m</div><div class="fd">+ drag, pump work ΓÇö Eq. (5)</div></div>
+        <div class="fnode"><div class="fn">systems/run_cycle_halbach.m</div><div class="fd">+ coil / braking resistance</div></div>
+      </div><div class="farr">ΓåÆ</div>
+      <div class="fstack">
+        <div class="fnode"><div class="fn">run_simulation.m</div><div class="fd">10 ├ù 4 perturbed replicates</div></div>
+        <div class="fnode"><div class="fn">metrics.m</div><div class="fd">summary ┬╖ one-way ANOVA</div></div>
+        <div class="fnode"><div class="fn">plotting.m ΓåÆ outputs/</div><div class="fd">CSVs behind Figs. 6ΓÇô7</div></div>
+      </div>
+    </div></div></div>
+
+  <div class="pipe rv"><div class="ph"><div class="t">Pipeline B ΓÇö electromechanical ODE framework</div><div class="s">four-systems-2025-26/simulation-electromech-ode/ ┬╖ LaTeX reference ┬º4ΓÇô┬º7</div></div>
+    <div class="pb"><div class="flow">
+      <div class="fnode"><div class="fn">system_parameters.m</div><div class="fd">SI parameter struct</div></div><div class="farr">ΓåÆ</div>
+      <div class="fnode"><div class="fn">main_simulation.m</div><div class="fd">transient run controller</div></div><div class="farr">ΓåÆ</div>
+      <div class="fstack">
+        <div class="fnode"><div class="fn">solvers/system_ode.m</div><div class="fd">Eq. (3) dynamics</div></div>
+        <div class="fnode"><div class="fn">models/*.m</div><div class="fd">mass-drum ┬╖ sprocket ┬╖ gearbox ┬╖ bevel ┬╖ motor ┬╖ load</div></div>
+        <div class="fnode"><div class="fn">utils/reflect_inertia.m</div><div class="fd">J<sub>eff</sub> composition</div></div>
+      </div><div class="farr">ΓåÆ</div>
+      <div class="fstack">
+        <div class="fnode"><div class="fn">analysis/energy_analysis.m</div><div class="fd">conservation check &lt; 1 %</div></div>
+        <div class="fnode"><div class="fn">scripts/optimize_gearbox.m</div><div class="fd">ratio sweep</div></div>
+        <div class="fnode"><div class="fn">scripts/analysis_compare_systems.m</div><div class="fd">gen-1 comparison ΓÇö superseded, ┬º10</div></div>
+      </div>
+    </div></div></div>
+
+  <h3 class="sub">Reproduction</h3>
+  <pre class="cmd rv"><span class="c"># results of record (MATLAB R2016b+)</span>
+cd four-systems-2025-26/simulation-four-systems
+addpath('matlab'); addpath('matlab/systems');
+run_presentation_plots_dark   <span class="c">% figures + CSV ΓåÆ matlab/outputs/</span>
+main                          <span class="c">% full ode45 run ┬╖ replicates ┬╖ ANOVA</span>
+
+<span class="c"># demonstrations (Node 18+)</span>
+cd interactive-demos &amp;&amp; npm install &amp;&amp; npm run dev
+
+<span class="c"># Halbach field figures + cycle animation (Python 3.10+)</span>
+cd interactive-demos/halbach-viz
+pip install -r requirements.txt &amp;&amp; python run_all.py</pre>
+</section>
+
+<!-- ================= ┬º8 APPLICATIONS ================= -->
+<section class="sec" id="s8">
+  <h2>Applications and current direction <span class="pv c" style="vertical-align:6px">IN DESIGN</span></h2>
+  <p><b>Elevator retrofit.</b> The regenerative pair (┬º3.3, ┬º3.4) maps onto traction-elevator
+  infrastructure: cab and counterweight already exist, modular masses stage at floor landings,
+  and regeneration occurs on every trip rather than only under favorable load as in current
+  commercial drives<a class="cite" href="#refs">[7,9]</a>. Representative elevator dimensional
+  analysis toward this application was performed during summer work at Virginia Tech
+  (┬º10, item 2).</p>
+  <p><b>Water infrastructure.</b> The buoyancy system (┬º3.1) targets coastal facilities,
+  treatment plants, and water towers, where the working fluid and vertical plumbing already
+  exist.</p>
+  <p><b>Electromagnetic direction.</b> Active design work continues on the quasi-Halbach
+  tubular machine (┬º3.2) ΓÇö the architecture with the fewest moving parts and full position
+  control ΓÇö and on the concept manuscript
+  (<code>documents/concept-paper/</code>, draft with placeholder values, flagged in-source).
+  Off-grid and backup deployments, where mechanical maintainability beats battery logistics,
+  are the long-term frame<span class="snref"></span>.</p>
+  <span class="sn">Prior art boundary, kept explicit: linear-machine dry gravity storage exists at industrial scale in the literature ΓÇö the contribution pursued here is the student-scale comparative architecture study, not a novelty claim on linear machines.</span>
+</section>
+
+<!-- ================= ┬º9 PROGRAM RECORD ================= -->
+<section class="sec" id="s9">
+  <h2>Program record</h2>
+  <p class="nojust">Where the work was developed and presented. The photographic record is curated in the
+  <a href="gallery.html">plates</a>; the full chronology with file-level evidence is
+  <code>TIMELINE.md</code>.</p>
+  <div class="eventgrid">
+    <div class="event rv"><img src="assets/gallery/regional_fair_2026_awards.jpg" alt="71st Fairfax County Regional Science and Engineering Fair awards ceremony" loading="lazy">
+      <div class="eb"><div class="ed">March 15ΓÇô17, 2026</div><div class="en">71st Fairfax County Regional Science &amp; Engineering Fair</div></div></div>
+    <div class="event rv"><img src="assets/gallery/isef_2026_team.jpg" alt="Regeneron ISEF 2026 team" loading="lazy">
+      <div class="eb"><div class="ed">May 2026</div><div class="en">Regeneron ISEF 2026</div></div></div>
+    <div class="event rv"><img src="assets/gallery/invention_convention_nationals_2026.jpg" alt="RTX Invention Convention U.S. Nationals 2026" loading="lazy">
+      <div class="eb"><div class="ed">June 3ΓÇô5, 2026</div><div class="en">RTX Invention Convention U.S. Nationals</div></div></div>
+    <div class="event rv"><img src="assets/gallery/EntireViewOfSetup.jpg" alt="Year-1 prototype scaffold" loading="lazy">
+      <div class="eb"><div class="ed">2024 ΓÇô 2025</div><div class="en">Chantilly HS fair ┬╖ regional season ΓÇö Year-1 prototype</div></div></div>
+  </div>
+</section>
+
+<!-- ================= ┬º10 PROVENANCE ================= -->
+<section class="sec" id="s10">
+  <h2>Provenance, limitations, and open questions</h2>
+  <p>Every quantitative claim on this page carries one of four evidence classes (front
+  matter). Three limitations govern interpretation, and the repository's
+  <code>PROVENANCE.md</code> maintains the complete map.</p>
+  <ol class="man">
+    <li><b>The ┬º5 numbers are simulations.</b> None of the four architectures exists as a full
+    physical machine; loss models are calibrated to ┬º2.4 but not validated against an
+    architecture-scale build. An earlier code generation (January 2026, Pipeline B) reported
+    higher absolute values ΓÇö 89.7 % for the variable counterweight ΓÇö before the calibrated
+    rebuild; both codebases and outputs are preserved, and the presentation-script draft in
+    which the team flagged its own electromagnetic-model error is retained verbatim.</li>
+    <li><b>Attribution gaps are flagged, not filled.</b> The summer-2025 internship host and the
+    mentor "Dr. Jim" are under-documented in primary sources; the drop height appears as
+    2 / 2.5 / 2.7 m across documents; the origin of two 3D-print STL sets is unconfirmed.</li>
+    <li><b>Placements are not claimed.</b> The ┬º9 record documents participation; award outcomes
+    are not stated in the archived files and are therefore not stated here.</li>
+  </ol>
+</section>
+
+<!-- ================= REFERENCES ================= -->
+<section class="sec" id="refs">
+  <h2>References</h2>
+  <ol class="refs rv">
+    <li>Kermani, M., Rahideh, A., &amp; Moamaei, P. (2018). Analysis of tubular linear motors for different shapes of magnets. <i>IEEE</i>. ΓÇö Basis for the T-shaped quasi-Halbach selection in ┬º3.2.</li>
+    <li>Elsayed, M. E. A., Abdo, S., Attia, A. A. A., Attia, E.-A., &amp; Abd Elrahman, M. A. (2022). Parametric optimisation for the design of gravity energy storage system using Taguchi method. <i>Scientific Reports</i>, 12, 19648.</li>
+    <li>Hunt, J. D., Zakeri, B., Jurasz, J., et al. (2023). Underground gravity energy storage: a solution for long-term energy storage. <i>Energies</i>, 16(2), 825.</li>
+    <li>Hunt, J., Nascimento, A., Zakeri, B., et al. (2022). Lift Energy Storage Technology: a solution for decentralized urban energy storage. <i>Energy</i>, 254, 124102.</li>
+    <li>Luo, X., Wang, J., Dooner, M., &amp; Clarke, J. (2015). Overview of current development in electrical energy storage technologies and the application potential in power system operation. <i>Applied Energy</i>, 137, 511ΓÇô536.</li>
+    <li>Ruoso, A. C., Caetano, N. R., &amp; Rocha, L. A. O. (2019). Storage gravitational energy for small scale industrial and residential applications. <i>Inventions</i>, 4(4), 64.</li>
+    <li>Kermani, M., Shirdare, E., Abbasi, S., Parise, G., &amp; Martirano, L. (2021). Elevator regenerative energy applications with ultracapacitor and battery energy storage systems in complex buildings. <i>Energies</i>, 14(11), 3259.</li>
+    <li>Zhang, Y., Yan, Z., Yuan, F., Yao, J., &amp; Ding, B. (2019). A novel reconstruction approach to elevator energy conservation based on a DC micro-grid in high-rise buildings. <i>Energies</i>, 12(1), 33.</li>
+    <li>Dalala, Z., Alwahsh, T., &amp; Saadeh, O. Energy recovery control in elevators with automatic rescue application. <i>ScienceDirect</i>.</li>
+  </ol>
+
+  <div class="colophon">
+    <b>Colophon.</b> This record is generated from the EcoDrop repository ΓÇö the archive of three
+    years of build photos, measured data, CAD, two simulation codebases, the engineering
+    logbook, and competition materials. Typeset in STIX Two Text and IBM Plex; mathematics by
+    KaTeX; motion by GSAP; figures drawn directly from repository CSVs. Palette inherited from
+    the project's LaTeX technical documentation. Ullah ┬╖ Paturu Muralikrishnan ┬╖ Khan, 2024 ΓÇô present.
+  </div>
+</section>
+
+</div></main>
+</div>
+
+<div class="tt" id="tt"></div>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script>
+/* ================= data (from repository CSVs) ================= */
+const SYS=[
+ {name:'Variable counterweight',color:'#2a78d6',de:77.0,sd:0.5},
+ {name:'Dual weight',color:'#1baf7a',de:60.0,sd:1.2},
+ {name:'Buoyancy',color:'#eda100',de:39.5,sd:1.8},
+ {name:'Halbach linear',color:'#008300',de:27.0,sd:2.1}];
+const LOSS_CH=['Rope friction','Bearing','Gearbox','Machine (I┬▓R + core)','System-specific'];
+const RAMP=['#86b6ef','#5598e7','#2a78d6','#1c5cab','#104281'];
+const LOSS=[
+ {sys:'Variable CW',vals:[18.3,3.05,42.7,54.9,186.05]},
+ {sys:'Dual weight',vals:[74.4,6.2,136.4,161.2,241.8]},
+ {sys:'Buoyancy',vals:[50.4,16.8,84,117.6,1411.2]},
+ {sys:'Halbach',vals:[93,31,155,248,2573]}];
+const MEAS=[{m:10,v:3.13,eff:18.7},{m:15,v:4.90,eff:25.2},{m:20,v:6.33,eff:25.6},{m:25,v:8.23,eff:28.7}];
+
+const NS='http://www.w3.org/2000/svg';
+const el=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e};
+const txt=(x,y,s,a={})=>{const e=el('text',{x,y,fill:a.fill||'#5c6675','font-size':a.fs||11,'text-anchor':a.an||'start','font-weight':a.fw||400});e.textContent=s;return e};
+const tt=document.getElementById('tt');
+function hover(n,html){n.addEventListener('mousemove',e=>{tt.innerHTML=html;tt.style.opacity=1;tt.style.left=Math.min(e.clientX+14,innerWidth-260)+'px';tt.style.top=(e.clientY+16)+'px'});n.addEventListener('mouseleave',()=>tt.style.opacity=0)}
+
+/* Fig: discharge efficiency */
+(function(){
+  const svg=document.getElementById('chDE');
+  const L=210,R=830,T=52,rowH=52,barH=22,x=v=>L+(R-L)*v/100;
+  [{a:70,b:85,lab:'pumped hydro 70ΓÇô85 %',ly:T-22},{a:85,b:92,lab:'Li-ion 85ΓÇô92 %',ly:T-38}].forEach((bd,i)=>{
+    svg.appendChild(el('rect',{x:x(bd.a),y:T-12,width:x(bd.b)-x(bd.a),height:rowH*4+6,fill:i?'#eef1f6':'#f4f6fa'}));
+    svg.appendChild(el('line',{x1:x((bd.a+bd.b)/2),y1:bd.ly+3,x2:x((bd.a+bd.b)/2),y2:T-12,stroke:'#c7d1db','stroke-width':1,'stroke-dasharray':'2 3'}));
+    svg.appendChild(txt(x((bd.a+bd.b)/2),bd.ly,bd.lab,{an:'middle',fs:10,fill:'#8a94a3'}));
+  });
+  for(let v=0;v<=100;v+=20){svg.appendChild(el('line',{x1:x(v),y1:T-12,x2:x(v),y2:T+rowH*4-6,stroke:'#e3e8ef','stroke-width':1}));svg.appendChild(txt(x(v),T+rowH*4+14,v+'%',{an:'middle',fs:10,fill:'#8a94a3'}))}
+  svg.appendChild(el('line',{x1:L,y1:T-12,x2:L,y2:T+rowH*4-6,stroke:'#c7d1db','stroke-width':1.2}));
+  SYS.forEach((s,i)=>{
+    const y=T+i*rowH,w=x(s.de)-L;
+    svg.appendChild(txt(L-12,y+barH/2+4,s.name,{an:'end',fs:12.5,fw:600,fill:'#111820'}));
+    const bar=el('path',{d:`M${L},${y} h${w-4} a4,4 0 0 1 4,4 v${barH-8} a4,4 0 0 1 -4,4 h${-(w-4)} z`,fill:s.color});
+    bar.classList.add('debar');svg.appendChild(bar);
+    [[s.de-s.sd,s.de+s.sd]].forEach(([a,b])=>{
+      svg.appendChild(el('line',{x1:x(a),y1:y+barH/2,x2:x(b),y2:y+barH/2,stroke:'#111820','stroke-width':1.4,opacity:.75}));
+      [a,b].forEach(q=>svg.appendChild(el('line',{x1:x(q),y1:y+barH/2-4,x2:x(q),y2:y+barH/2+4,stroke:'#111820','stroke-width':1.4,opacity:.75})));
+    });
+    svg.appendChild(txt(x(s.de)+14,y+barH/2+4.5,s.de.toFixed(1)+' %',{fs:12.5,fw:700,fill:'#111820'}));
+    const hit=el('rect',{x:L,y:y-6,width:R-L,height:barH+12,fill:'transparent'});
+    hover(hit,`<div class="h">${s.name}</div>DE ${s.de.toFixed(1)} ┬▒ ${s.sd} %<br><span class="mono">10 replicates ┬╖ 50 kg ┬╖ 3 m</span>`);
+    svg.appendChild(hit);
+  });
+  svg.appendChild(txt(L,T+rowH*4+34,'Discharge efficiency, Eq. (2) ΓÇö mean of 10 perturbed replicates per system',{fs:10.5,fill:'#8a94a3'}));
+})();
+
+/* Fig: loss channels */
+(function(){
+  const svg=document.getElementById('chLoss');
+  const L=210,R=790,T=30,rowH=58,barH=24,MAX=3200,x=v=>L+(R-L)*v/MAX;
+  for(let v=0;v<=MAX;v+=800){svg.appendChild(el('line',{x1:x(v),y1:T-8,x2:x(v),y2:T+rowH*4-14,stroke:'#e3e8ef','stroke-width':1}));svg.appendChild(txt(x(v),T+rowH*4+6,v.toLocaleString('en-US')+' J',{an:'middle',fs:10,fill:'#8a94a3'}))}
+  svg.appendChild(el('line',{x1:L,y1:T-8,x2:L,y2:T+rowH*4-14,stroke:'#c7d1db','stroke-width':1.2}));
+  LOSS.forEach((r,i)=>{
+    const y=T+i*rowH,total=r.vals.reduce((a,b)=>a+b,0);let cx=L;
+    svg.appendChild(txt(L-12,y+barH/2+4,r.sys,{an:'end',fs:12.5,fw:600,fill:'#111820'}));
+    r.vals.forEach((v,j)=>{
+      const w=Math.max(x(v)-L,v>0?1:0);if(w<=0)return;
+      const seg=el('rect',{x:cx,y,width:Math.max(w-2,1),height:barH,fill:RAMP[j],rx:j===4?3:0});
+      seg.classList.add('lossseg');
+      hover(seg,`<div class="h">${r.sys}</div>${LOSS_CH[j]}: <b>${v.toLocaleString('en-US')} J</b> (${(100*v/total).toFixed(1)} % of losses)<br><span class="mono">total ${total.toLocaleString('en-US')} J / cycle</span>`);
+      svg.appendChild(seg);cx+=w;
+    });
+    svg.appendChild(txt(cx+10,y+barH/2+4.5,Math.round(total).toLocaleString('en-US')+' J',{fs:12,fw:700,fill:'#111820'}));
+  });
+  svg.appendChild(txt(L,T+rowH*4+26,'Energy lost per cycle by channel ΓÇö Eq. (3) loss terms integrated over the cycle',{fs:10.5,fill:'#8a94a3'}));
+  const lg=document.getElementById('lossLegend');
+  LOSS_CH.forEach((c,j)=>{const d=document.createElement('div');d.className='it';d.innerHTML=`<span class="sw" style="background:${RAMP[j]}"></span>${c}`;lg.appendChild(d)});
+})();
+
+/* Fig: measured small multiples */
+(function(){
+  const svg=document.getElementById('chMeasured');
+  const T=46,B=252,panels=[{x0:56,x1:320,title:'Mean voltage (V)',key:'v',max:9,fmt:v=>v.toFixed(2)},{x0:400,x1:664,title:'Efficiency (%)',key:'eff',max:32,fmt:v=>v.toFixed(1)}];
+  panels.forEach(p=>{
+    const xs=m=>p.x0+(p.x1-p.x0)*(m-8)/(27-8),ys=v=>B-(B-T)*v/p.max;
+    svg.appendChild(txt(p.x0,24,p.title,{fs:12,fw:600,fill:'#111820'}));
+    for(let g=0;g<=p.max;g+=p.max/4){svg.appendChild(el('line',{x1:p.x0,y1:ys(g),x2:p.x1,y2:ys(g),stroke:'#e3e8ef','stroke-width':1}));svg.appendChild(txt(p.x0-7,ys(g)+3.5,String(Math.round(g)),{an:'end',fs:9.5,fill:'#8a94a3'}))}
+    MEAS.forEach(d=>svg.appendChild(txt(xs(d.m),B+16,d.m+' kg',{an:'middle',fs:10,fill:'#8a94a3'})));
+    const pts=MEAS.map(d=>[xs(d.m),ys(d[p.key])]);
+    svg.appendChild(el('path',{d:'M'+pts.map(q=>q.join(',')).join(' L'),fill:'none',stroke:'#2a78d6','stroke-width':2,'stroke-linejoin':'round'}));
+    MEAS.forEach((d,i)=>{
+      const c=el('circle',{cx:pts[i][0],cy:pts[i][1],r:4.5,fill:'#2a78d6',stroke:'#fff','stroke-width':2});
+      hover(c,`<div class="h">${d.m} kg</div>${p.title}: <b>${p.fmt(d[p.key])}</b><br><span class="mono">3 trials ┬╖ multimeter</span>`);
+      svg.appendChild(c);
+      svg.appendChild(txt(pts[i][0],pts[i][1]-11,p.fmt(d[p.key]),{an:'middle',fs:10,fw:600,fill:'#111820'}));
+    });
+  });
+  svg.appendChild(txt(56,286,'Dropped mass (independent variable) ΓÇö 3 trials per level, Γëê2.5 m drop',{fs:10.5,fill:'#8a94a3'}));
+})();
+
+/* demos */
+(function(){
+  const tabs=document.getElementById('demoTabs'),frame=document.getElementById('demoFrame'),loader=document.getElementById('demoLoad'),openNew=document.getElementById('demoNew');
+  let cur='lab/elevator-variable.html',loaded=false;
+  function mount(){loaded=true;frame.querySelector('iframe')?.remove();const f=document.createElement('iframe');f.src=cur;f.title='EcoDrop demonstration';frame.appendChild(f);loader.style.display='none'}
+  loader.addEventListener('click',mount);
+  tabs.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{tabs.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');cur=b.dataset.src;openNew.href=cur;if(loaded)mount();else loader.style.display='flex'}));
+})();
+
+/* KaTeX */
+window.addEventListener('load',()=>{if(window.renderMathInElement)renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true}]})});
+
+/* GSAP: progress, position readout, reveals, chart entrances, scrollspy */
+gsap.registerPlugin(ScrollTrigger);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+gsap.to('#progress',{width:'100%',ease:'none',scrollTrigger:{trigger:document.body,start:'top top',end:'bottom bottom',scrub:.4}});
+if(!reduce){
+  document.querySelectorAll('.rv').forEach(n=>{
+    gsap.to(n,{opacity:1,y:0,duration:.7,ease:'power2.out',scrollTrigger:{trigger:n,start:'top 88%'}});
+  });
+  gsap.from('#chDE .debar',{scaleX:0,transformOrigin:'left center',duration:.9,stagger:.12,ease:'power3.out',scrollTrigger:{trigger:'#chDE',start:'top 80%'}});
+  gsap.from('#chLoss .lossseg',{opacity:0,duration:.45,stagger:.02,scrollTrigger:{trigger:'#chLoss',start:'top 80%'}});
+}else{document.querySelectorAll('.rv').forEach(n=>{n.style.opacity=1;n.style.transform='none'})}
+/* spine scrollspy + header position */
+const posEl=document.getElementById('pos');
+const names={front:'┬º0 ┬╖ Front matter',s1:'┬º1 ┬╖ Problem & prior art',s2:'┬º2 ┬╖ Generation prototype',s3:'┬º3 ┬╖ Storage architectures',s4:'┬º4 ┬╖ Model & protocol',s5:'┬º5 ┬╖ Results',s6:'┬º6 ┬╖ Demonstrations',s7:'┬º7 ┬╖ Computational apparatus',s8:'┬º8 ┬╖ Applications',s9:'┬º9 ┬╖ Program record',s10:'┬º10 ┬╖ Provenance',refs:'References'};
+Object.keys(names).forEach(id=>{
+  const n=document.getElementById(id);if(!n)return;
+  ScrollTrigger.create({trigger:n,start:'top 35%',end:'bottom 35%',
+    onToggle:st=>{if(st.isActive){posEl.textContent=names[id];
+      document.querySelectorAll('.spine a[data-sec]').forEach(a=>a.classList.toggle('on',a.dataset.sec===id));}}});
+});
+</script>
+</body>
+</html>

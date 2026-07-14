@@ -1,0 +1,273 @@
+
+<style>
+  .fig-block { margin-bottom: 56px; }
+  .fig-label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 2px; font-family: var(--font-sans); }
+  .fig-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; font-family: var(--font-sans); }
+  .fig-caption { font-size: 11px; color: var(--color-text-secondary); margin-top: 10px; line-height: 1.6; font-family: var(--font-sans); }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 12px; font-size: 12px; color: var(--color-text-secondary); font-family: var(--font-sans); }
+  .legend span { display: flex; align-items: center; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+</style>
+
+<div style="padding: 1rem 0;">
+
+<!-- FIG 1 -->
+<div class="fig-block">
+  <div class="fig-label">Fig 1</div>
+  <div class="fig-title">Round-trip efficiency: all 4 gravitational storage systems vs. industry benchmarks</div>
+  <div style="position:relative;width:100%;height:260px;"><canvas id="c1"></canvas></div>
+  <div class="fig-caption">Industry benchmarks taken as midpoints of ranges reported by the U.S. Energy Information Administration. Pumped hydro: 77.5%. Li-ion: 88.5%. See works cited.</div>
+</div>
+
+<!-- FIG 2 -->
+<div class="fig-block">
+  <div class="fig-label">Fig 2</div>
+  <div class="fig-title">Energy loss breakdown per cycle: mechanical vs. system-specific losses</div>
+  <div class="legend">
+    <span><span class="dot" style="background:#4CAF82;"></span>Rope</span>
+    <span><span class="dot" style="background:#E8A838;"></span>Bearing</span>
+    <span><span class="dot" style="background:#E06B6B;"></span>Gearbox</span>
+    <span><span class="dot" style="background:#9B8EC4;"></span>Motor</span>
+    <span><span class="dot" style="background:#3A7D2C;"></span>System-specific</span>
+  </div>
+  <div style="position:relative;width:100%;height:320px;"><canvas id="c2"></canvas></div>
+  <div class="fig-caption">Baseline: 50 kg mass, 3 m drop, 1471.5 J gravitational PE input. Mechanical losses (rope, bearing, gearbox, motor) are nearly identical across all four systems. System-specific losses account for the entire performance difference between systems.</div>
+</div>
+
+<!-- FIG 3 -->
+<div class="fig-block">
+  <div class="fig-label">Fig 3</div>
+  <div class="fig-title">Energy input to charge vs. electrical energy recovered on discharge per cycle</div>
+  <div class="legend">
+    <span><span class="dot" style="background:#BBBBBB;border:1px solid #999;"></span>Energy in to charge (PE input, 1471.5 J — identical for all systems)</span>
+    <span><span class="dot" style="background:#7F77DD;"></span>Energy out on discharge (electrical)</span>
+  </div>
+  <div style="position:relative;width:100%;height:320px;"><canvas id="c3"></canvas></div>
+  <div class="fig-caption">All systems receive identical gravitational PE input (1471.5 J). The gap between each gray and colored bar represents total cycle losses. The ratio of output to input equals round-trip efficiency.</div>
+</div>
+
+<!-- FIG 4 — TORNADO -->
+<div class="fig-block">
+  <div class="fig-label">Fig 4</div>
+  <div class="fig-title">Efficiency robustness: RTE sensitivity to ±10% friction variation — all 4 systems</div>
+  <div style="position:relative;width:100%;height:300px;"><canvas id="c4"></canvas></div>
+  <div class="fig-caption">Each bar shows the RTE range when friction coefficients are varied ±10% from baseline. Center value is baseline RTE. Narrow bars indicate low sensitivity. System rankings are preserved under all tested conditions.</div>
+</div>
+
+<!-- FIG 5 -->
+<div class="fig-block">
+  <div class="fig-label">Fig 5</div>
+  <div class="fig-title">Cycles required to deliver 1 kWh vs. drop height: all 4 systems at 50 kg mass, 3–50 m</div>
+  <div class="legend">
+    <span><span style="width:18px;height:3px;background:#7F77DD;display:inline-block;border-radius:2px;"></span>Variable CW</span>
+    <span><span style="width:18px;height:3px;background:#378ADD;display:inline-block;border-radius:2px;"></span>Dual Weight</span>
+    <span><span style="width:18px;height:3px;background:#D85A30;display:inline-block;border-radius:2px;"></span>Buoyancy</span>
+    <span><span style="width:18px;height:3px;background:#639922;display:inline-block;border-radius:2px;"></span>Halbach Array</span>
+    <span><span style="width:18px;height:2px;border-top:2px dashed #999;display:inline-block;"></span>beyond engineering limit</span>
+  </div>
+  <div style="position:relative;width:100%;height:340px;"><canvas id="c5"></canvas></div>
+  <div class="fig-caption">Buoyancy shown dashed beyond ~15 m and Halbach Array beyond ~10 m — fundamental machine redesign required at greater heights. Variable CW and Dual Weight scale naturally with shaft height and are shown solid through 50 m.</div>
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const GL = 'rgba(0,0,0,0.06)';
+const TX = { color: '#333', font: { size: 12 } };
+const TX2 = { color: '#333', font: { size: 12 } };
+
+// ── FIG 1 ──────────────────────────────────────────────
+new Chart(document.getElementById('c1'), {
+  type: 'bar',
+  data: {
+    labels: ['Halbach Array','Buoyancy','Dual Weight','Variable CW'],
+    datasets: [{ data:[27,39.5,60,77], backgroundColor:['#639922','#D85A30','#378ADD','#7F77DD'], borderRadius:4, barThickness:32 }]
+  },
+  options: {
+    indexAxis:'y', responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false}, tooltip:{callbacks:{label:c=>c.parsed.x+'%'}} },
+    scales:{
+      x:{ min:0,max:100, title:{display:true,text:'Round-trip efficiency (%)',color:'#444',font:{size:12}}, ticks:{...TX,callback:v=>v+'%'}, grid:{color:GL} },
+      y:{ ticks:TX, grid:{display:false} }
+    }
+  },
+  plugins:[{
+    afterDraw(chart){
+      const ctx=chart.ctx, xs=chart.scales.x, ys=chart.scales.y;
+      const ph=xs.getPixelForValue(77.5), li=xs.getPixelForValue(88.5);
+      const t=ys.top, b=ys.bottom;
+      ctx.save();
+      ctx.lineWidth=1.5; ctx.setLineDash([5,4]);
+      ctx.strokeStyle='#888'; ctx.beginPath(); ctx.moveTo(ph,t); ctx.lineTo(ph,b); ctx.stroke();
+      ctx.strokeStyle='#444'; ctx.beginPath(); ctx.moveTo(li,t); ctx.lineTo(li,b); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.font='11px sans-serif'; ctx.textAlign='center'; ctx.fillStyle='#666';
+      ctx.fillText('Pumped hydro 77.5%',ph,t-6);
+      ctx.fillText('Li-ion 88.5%',li,t-6);
+      ctx.restore();
+      chart.data.datasets[0].data.forEach((v,i)=>{
+        const bar=chart.getDatasetMeta(0).data[i];
+        ctx.save(); ctx.fillStyle='#222'; ctx.font='bold 13px sans-serif'; ctx.textAlign='left';
+        ctx.fillText(v+'%', bar.x+6, bar.y+5); ctx.restore();
+      });
+    }
+  }]
+});
+
+// ── FIG 2 ──────────────────────────────────────────────
+const totals=[338,589,890,1074];
+new Chart(document.getElementById('c2'), {
+  type:'bar',
+  data:{
+    labels:['Variable CW','Dual Weight','Buoyancy','Halbach Array'],
+    datasets:[
+      {label:'Rope',            data:[20,71,27,32],   backgroundColor:'#4CAF82'},
+      {label:'Bearing',         data:[3,6,9,11],      backgroundColor:'#E8A838'},
+      {label:'Gearbox',         data:[47,129,45,54],  backgroundColor:'#E06B6B'},
+      {label:'Motor',           data:[61,153,62,86],  backgroundColor:'#9B8EC4'},
+      {label:'System-specific', data:[207,230,748,892],backgroundColor:'#3A7D2C'},
+    ]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.parsed.y} J`}}},
+    scales:{
+      x:{stacked:true, ticks:TX, grid:{display:false}},
+      y:{stacked:true, title:{display:true,text:'Energy loss per cycle (J)',color:'#444',font:{size:12}}, ticks:TX, grid:{color:GL}}
+    }
+  },
+  plugins:[{
+    afterDraw(chart){
+      const ctx=chart.ctx;
+      const lastMeta=chart.getDatasetMeta(chart.data.datasets.length-1);
+      totals.forEach((tot,i)=>{
+        const bar=lastMeta.data[i];
+        ctx.save(); ctx.fillStyle='#222'; ctx.font='bold 12px sans-serif'; ctx.textAlign='center';
+        ctx.fillText(tot+' J', bar.x, bar.y-6); ctx.restore();
+      });
+    }
+  }]
+});
+
+// ── FIG 3 ──────────────────────────────────────────────
+const outVals=[1133,883,581,397];
+const outColors=['#7F77DD','#378ADD','#D85A30','#639922'];
+new Chart(document.getElementById('c3'), {
+  type:'bar',
+  data:{
+    labels:['Variable CW','Dual Weight','Buoyancy','Halbach Array'],
+    datasets:[
+      {label:'Energy in (PE input)',      data:[1471.5,1471.5,1471.5,1471.5], backgroundColor:'#CCCCCC', borderRadius:4},
+      {label:'Energy out (electrical)',   data:outVals, backgroundColor:outColors, borderRadius:4}
+    ]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.parsed.y} J`}}},
+    scales:{
+      x:{ticks:TX, grid:{display:false}},
+      y:{title:{display:true,text:'Energy per cycle (J)',color:'#444',font:{size:12}}, ticks:TX, grid:{color:GL}}
+    }
+  },
+  plugins:[{
+    afterDraw(chart){
+      const ctx=chart.ctx;
+      chart.getDatasetMeta(0).data.forEach((bar,i)=>{
+        ctx.save(); ctx.fillStyle='#555'; ctx.font='12px sans-serif'; ctx.textAlign='center';
+        ctx.fillText('1471.5 J', bar.x, bar.y-6); ctx.restore();
+      });
+      chart.getDatasetMeta(1).data.forEach((bar,i)=>{
+        ctx.save(); ctx.fillStyle='#222'; ctx.font='bold 13px sans-serif'; ctx.textAlign='center';
+        ctx.fillText(outVals[i]+' J', bar.x, bar.y-6); ctx.restore();
+      });
+    }
+  }]
+});
+
+// ── FIG 4 — TORNADO ────────────────────────────────────
+// baseline, +10% RTE, -10% RTE
+const systems=['Variable CW','Dual Weight','Buoyancy','Halbach Array'];
+const base=[77.0,60.0,39.5,27.0];
+const plus=[76.5,59.5,39.0,26.5];
+const minus=[77.4,60.4,39.9,27.4];
+const tColors=['#7F77DD','#378ADD','#D85A30','#639922'];
+
+// tornado: horizontal bars showing range, centered on baseline
+// render as floating bars: [min, max]
+const ranges = base.map((_,i)=>[ plus[i], minus[i] ]); // [low, high]
+
+new Chart(document.getElementById('c4'), {
+  type:'bar',
+  data:{
+    labels: systems,
+    datasets:[{
+      label:'RTE range under ±10% friction',
+      data: ranges,
+      backgroundColor: tColors.map(c=>c+'99'),
+      borderColor: tColors,
+      borderWidth: 2,
+      borderRadius: 3,
+      barThickness: 28
+    }]
+  },
+  options:{
+    indexAxis:'y', responsive:true, maintainAspectRatio:false,
+    plugins:{
+      legend:{display:false},
+      tooltip:{callbacks:{label:c=>`RTE range: ${c.parsed._custom.min.toFixed(1)}% – ${c.parsed._custom.max.toFixed(1)}%`}}
+    },
+    scales:{
+      x:{
+        min:0, max:100,
+        title:{display:true,text:'Round-trip efficiency (%)',color:'#444',font:{size:12}},
+        ticks:{...TX, callback:v=>v+'%'}, grid:{color:GL}
+      },
+      y:{ ticks:TX, grid:{display:false} }
+    }
+  },
+  plugins:[{
+    afterDraw(chart){
+      const ctx=chart.ctx, xs=chart.scales.x;
+      base.forEach((b,i)=>{
+        const px=xs.getPixelForValue(b);
+        const bar=chart.getDatasetMeta(0).data[i];
+        const y=bar.y;
+        ctx.save();
+        ctx.strokeStyle='#222'; ctx.lineWidth=2;
+        ctx.beginPath(); ctx.moveTo(px,y-12); ctx.lineTo(px,y+12); ctx.stroke();
+        ctx.fillStyle='#222'; ctx.font='bold 12px sans-serif'; ctx.textAlign='left';
+        ctx.fillText(`${plus[i]}–${minus[i]}%  (baseline ${b}%)`, xs.getPixelForValue(minus[i])+8, y+4);
+        ctx.restore();
+      });
+    }
+  }]
+});
+
+// ── FIG 5 ──────────────────────────────────────────────
+const target=3600000, mass=50, g=9.81;
+const rtes={vcw:0.77,dw:0.60,buoy:0.395,hal:0.27};
+const wH=10, wB=15;
+const hs=Array.from({length:48},(_,i)=>i+3);
+function cy(rte,h){return Math.round(target/(rte*mass*g*h));}
+
+new Chart(document.getElementById('c5'),{
+  type:'scatter',
+  data:{datasets:[
+    {label:'Variable CW', data:hs.map(h=>({x:h,y:cy(rtes.vcw,h)})), borderColor:'#7F77DD', showLine:true, borderWidth:2.5, pointRadius:0, tension:0.2},
+    {label:'Dual Weight', data:hs.map(h=>({x:h,y:cy(rtes.dw,h)})),  borderColor:'#378ADD', showLine:true, borderWidth:2.5, pointRadius:0, tension:0.2},
+    {label:'Buoyancy',    data:hs.filter(h=>h<=wB).map(h=>({x:h,y:cy(rtes.buoy,h)})), borderColor:'#D85A30', showLine:true, borderWidth:2.5, pointRadius:0, tension:0.2},
+    {label:'Buoyancy—',   data:hs.filter(h=>h>=wB).map(h=>({x:h,y:cy(rtes.buoy,h)})), borderColor:'#D85A30', showLine:true, borderWidth:2, borderDash:[6,4], pointRadius:0, tension:0.2},
+    {label:'Halbach',     data:hs.filter(h=>h<=wH).map(h=>({x:h,y:cy(rtes.hal,h)})),  borderColor:'#639922', showLine:true, borderWidth:2.5, pointRadius:0, tension:0.2},
+    {label:'Halbach—',    data:hs.filter(h=>h>=wH).map(h=>({x:h,y:cy(rtes.hal,h)})),  borderColor:'#639922', showLine:true, borderWidth:2, borderDash:[6,4], pointRadius:0, tension:0.2},
+  ]},
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.parsed.y.toLocaleString()} cycles`}}},
+    scales:{
+      x:{type:'linear',min:3,max:50, title:{display:true,text:'Drop height (m)',color:'#444',font:{size:12}}, ticks:{...TX,stepSize:5}, grid:{color:GL}},
+      y:{min:0,max:12000, title:{display:true,text:'Cycles to deliver 1 kWh',color:'#444',font:{size:12}}, ticks:{...TX,callback:v=>v.toLocaleString()}, grid:{color:GL}}
+    }
+  }
+});
+</script>

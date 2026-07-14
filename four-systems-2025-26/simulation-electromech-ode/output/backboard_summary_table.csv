@@ -1,0 +1,5 @@
+System,Mass_kg,Height_m,PE_grav_J,T_cycle_s,E_elec_out_J,Discharge_eff_pct,Round_trip_eff_pct_vs_PE,E_loss_J,P_elec_avg_W,Cycles_to_1_kWh,kWh_over_10000_cycles,Cost_model_USD_per_kWh
+Variable CW,50,3,1471.5,8,1133,77,77,338.5,141.63,3177,3.1472,222.42
+Dual Weight,50,3,1471.5,6,883,60,60,588.5,147.17,4077,2.4528,203.85
+Buoyancy,50,3,1471.5,46.2,581,39.5,39.5,890.5,12.58,6196,1.6139,371.77
+Halbach Array,50,3,1471.5,9.7,397,27,27,1074.5,40.93,9068,1.1028,816.12

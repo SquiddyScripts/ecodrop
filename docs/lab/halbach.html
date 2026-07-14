@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Halbach Electromagnetic Gravity Storage — 3D Demonstration</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <script type="module" crossorigin src="./assets/halbach-BLd2cfta.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/assetLoader-DFlJKZXL.js">
+    <link rel="stylesheet" crossorigin href="./assets/assetLoader-CYzD0jOM.css">
+    <link rel="stylesheet" crossorigin href="./assets/halbach-Boq6eOsl.css">
+    <link rel="stylesheet" crossorigin href="./assets/site-nav-dGDy7Jsm.css">
+  </head>
+  <body>
+    <nav class="site-nav site-nav--overlay" aria-label="Systems">
+      <a class="site-nav__brand" href="./">Gravity Battery Lab</a>
+      <div class="site-nav__links">
+        <a href="./buoyancy.html">Buoyancy</a>
+        <a href="./halbach.html" class="active">Halbach</a>
+        <a href="./elevator-dual.html">Dual-Weight</a>
+        <a href="./elevator-variable.html">Variable CW</a>
+      </div>
+    </nav>
+
+    <div id="app" class="halbach-app">
+      <canvas id="canvas"></canvas>
+      <p id="load-status" class="load-status">Loading…</p>
+
+      <aside id="hud">
+        <header>
+          <p class="eyebrow">EcoDrop · System 02</p>
+          <h1>Halbach Gravitational Energy Storage</h1>
+        </header>
+
+        <section class="panel phase-panel">
+          <div class="phase-badge" id="phase-badge">Phase 1</div>
+          <h2 id="phase-title">Lift — Halbach thrust</h2>
+          <p id="phase-desc">
+            Four tubular linear motors (6-phase Halbach arrays) provide combined thrust. The hoist drum maintains rope tension separately.
+          </p>
+        </section>
+
+        <section class="panel metrics">
+          <div class="metric"><span>Weight height</span><strong id="m-height">0.00 m</strong></div>
+          <div class="metric"><span>Velocity</span><strong id="m-velocity">0.00 m/s</strong></div>
+          <div class="metric"><span>Thrust (4× TLM)</span><strong id="m-thrust">0 N</strong></div>
+          <div class="metric"><span>Flux intensity</span><strong id="m-flux">0%</strong></div>
+          <div class="metric"><span>Linear motor</span><strong id="m-motor">0 W</strong></div>
+          <div class="metric"><span>Hoist tension</span><strong id="m-hoist">0 W</strong></div>
+          <div class="metric"><span>Phase current</span><strong id="m-current">0 A</strong></div>
+          <div class="metric"><span>Power</span><strong id="m-power">Idle</strong></div>
+        </section>
+
+        <section class="panel controls">
+          <div class="row">
+            <button id="btn-play" type="button">Pause</button>
+            <button id="btn-reset" type="button">Reset</button>
+          </div>
+          <label class="slider-label">Cycle time<input id="scrubber" type="range" min="0" max="1000" value="0" /></label>
+          <label class="slider-label">Playback speed<input id="speed" type="range" min="0.25" max="4" step="0.25" value="1" /><span id="speed-label">1.0×</span></label>
+          <label class="check"><input id="toggle-labels" type="checkbox" checked /> Show callouts</label>
+          <label class="check"><input id="toggle-xray" type="checkbox" checked /> X-ray stator shells</label>
+          <label class="check"><input id="toggle-flux" type="checkbox" /> Air-gap flux glow</label>
+        </section>
+
+        <section class="panel legend">
+          <h3>Cycle overview</h3>
+          <ol>
+            <li><strong>Lift</strong> — 4× tubular Halbach motors thrust upward; hoist maintains cable tension</li>
+            <li><strong>Hold</strong> — weight at 3 m stroke; motors idle, tension motor active</li>
+            <li><strong>Drop</strong> — gravity descent drives regeneration through hoist/generator</li>
+          </ol>
+        </section>
+      </aside>
+
+      <aside id="charts-panel">
+        <header><h2>Live system telemetry</h2><p>Real-time thrust, flux, power &amp; phase current</p></header>
+        <div id="charts-grid"></div>
+        <div id="fem-panel"></div>
+      </aside>
+    </div>
+  </body>
+</html>

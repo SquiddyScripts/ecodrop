@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Buoyancy Gravity Battery — 3D Demonstration</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/src/style.css" />
+    <link rel="stylesheet" href="/src/site-nav.css" />
+  </head>
+  <body>
+    <nav class="site-nav site-nav--overlay" aria-label="Systems">
+      <a class="site-nav__brand" href="/">Gravity Battery Lab</a>
+      <div class="site-nav__links">
+        <a href="/buoyancy.html" class="active">Buoyancy</a>
+        <a href="/halbach.html">Halbach</a>
+        <a href="/elevator-dual.html">Dual-Weight</a>
+        <a href="/elevator-variable.html">Variable CW</a>
+      </div>
+    </nav>
+
+    <div id="app">
+      <canvas id="canvas"></canvas>
+      <p id="load-status" class="load-status">Loading…</p>
+
+      <aside id="hud">
+        <header>
+          <p class="eyebrow">EcoDrop · System 01</p>
+          <h1>Buoyancy Gravitational Energy Storage</h1>
+        </header>
+
+        <section class="panel phase-panel">
+          <div class="phase-badge" id="phase-badge">Phase 1</div>
+          <h2 id="phase-title">Lift — water fills chamber</h2>
+          <p id="phase-desc">
+            Water enters the chamber from the top reservoir. Buoyancy assists the hoist motor as the weight rises.
+          </p>
+        </section>
+
+        <section class="panel metrics">
+          <div class="metric">
+            <span>Weight height</span>
+            <strong id="m-height">0.00 m</strong>
+          </div>
+          <div class="metric">
+            <span>Chamber fill</span>
+            <strong id="m-chamber">0%</strong>
+          </div>
+          <div class="metric">
+            <span>Top reservoir</span>
+            <strong id="m-reservoir">100%</strong>
+          </div>
+          <div class="metric">
+            <span>Power</span>
+            <strong id="m-power">0 W</strong>
+          </div>
+        </section>
+
+        <section class="panel controls">
+          <div class="row">
+            <button id="btn-play" type="button">Pause</button>
+            <button id="btn-reset" type="button">Reset</button>
+          </div>
+          <label class="slider-label">
+            Cycle time
+            <input id="scrubber" type="range" min="0" max="1000" value="0" />
+          </label>
+          <label class="slider-label">
+            Playback speed
+            <input id="speed" type="range" min="0.25" max="4" step="0.25" value="1" />
+            <span id="speed-label">1.0×</span>
+          </label>
+          <label class="check">
+            <input id="toggle-labels" type="checkbox" checked />
+            Show callouts
+          </label>
+          <label class="check">
+            <input id="toggle-xray" type="checkbox" checked />
+            X-ray tower walls
+          </label>
+        </section>
+
+        <section class="panel legend">
+          <h3>Cycle overview</h3>
+          <ol>
+            <li><strong>Lift</strong> — top tank drains into chamber; buoyancy + motor raise weight</li>
+            <li><strong>Water transfer</strong> — chamber drains to bottom tank; pump returns water to top</li>
+            <li><strong>Drop</strong> — weight falls and drives the generator</li>
+          </ol>
+          <p class="note">
+            Physically routed piping · buoyancy-coupled weight · animated water surfaces.
+          </p>
+        </section>
+      </aside>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

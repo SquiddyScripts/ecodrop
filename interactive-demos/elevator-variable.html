@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Variable Counterweight Regeneration Elevator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/site-nav.css" />
+  <style>
+    :root {
+      --bg: #0c0f14;
+      --panel: rgba(18, 23, 31, 0.88);
+      --line: #1f2733;
+      --ink: #cdd6e0;
+      --dim: #7d8a9b;
+      --cyan: #57d1e6;
+      --amber: #e0a13a;
+      --green: #5be08a;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'JetBrains Mono', monospace;
+      overflow: hidden;
+    }
+    #app { position: fixed; inset: 0; }
+    canvas { display: block; width: 100%; height: 100%; }
+
+    .panel {
+      position: absolute;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      z-index: 20;
+    }
+
+    #nav { display: none; }
+
+    #title {
+      top: 56px;
+      left: 14px;
+      padding: 12px 16px;
+      max-width: 320px;
+    }
+    #title h1 {
+      margin: 0;
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 17px;
+      color: #fff;
+      letter-spacing: 0.04em;
+    }
+    #title .sub { margin-top: 4px; font-size: 10.5px; color: var(--dim); }
+    #state { margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 11px; }
+    #dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--dim);
+    }
+    #dot.on {
+      background: var(--green);
+      animation: pulse 1.4s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 6px 2px rgba(91, 224, 138, 0.4); }
+      50% { box-shadow: 0 0 14px 4px rgba(91, 224, 138, 0.85); }
+    }
+
+    #data {
+      top: 56px;
+      right: 14px;
+      padding: 12px 14px;
+      width: 228px;
+    }
+    #data h2 {
+      margin: 0 0 8px;
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      color: var(--cyan);
+      text-transform: uppercase;
+    }
+    #data .row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      padding: 4px 0;
+      border-bottom: 1px dashed var(--line);
+    }
+    #data .row:last-child { border-bottom: none; }
+    #data .k { color: var(--dim); }
+    .v { font-weight: 600; }
+    .v.g { color: var(--green); }
+    .v.a { color: var(--amber); }
+    .v.c { color: var(--cyan); }
+
+    #ctrl {
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 8px 12px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 8px 10px;
+      max-width: min(96vw, 920px);
+    }
+    button {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--ink);
+      background: #161c25;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 6px 10px;
+      cursor: pointer;
+    }
+    button:hover { border-color: var(--cyan); color: #fff; }
+    button.act { border-color: var(--cyan); color: var(--cyan); }
+    .lbl {
+      font-size: 9px;
+      color: var(--dim);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-right: 2px;
+    }
+    .grp {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: nowrap;
+    }
+    .sep {
+      width: 1px;
+      height: 22px;
+      background: var(--line);
+      flex-shrink: 0;
+    }
+    #paxVal {
+      font-family: 'Chakra Petch', sans-serif;
+      color: var(--cyan);
+      font-size: 13px;
+      min-width: 16px;
+      text-align: center;
+    }
+
+    #hint {
+      position: absolute;
+      bottom: 62px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 9.5px;
+      color: var(--dim);
+      z-index: 15;
+      pointer-events: none;
+    }
+
+    .tag {
+      position: absolute;
+      transform: translate(-50%, -120%);
+      pointer-events: none;
+      font-size: 10px;
+      color: #fff;
+      background: rgba(10, 14, 20, 0.78);
+      border: 1px solid var(--line);
+      border-left: 2px solid var(--cyan);
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+      z-index: 10;
+    }
+    .tag.amber { border-left-color: var(--amber); }
+    .tag.green { border-left-color: var(--green); }
+
+    @media (max-width: 720px) {
+      #data { display: none; }
+      #ctrl .grp.views button:not(.act) { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <nav class="site-nav site-nav--overlay" aria-label="Systems">
+    <a class="site-nav__brand" href="/">Gravity Battery Lab</a>
+    <div class="site-nav__links">
+      <a href="/buoyancy.html">Buoyancy</a>
+      <a href="/halbach.html">Halbach</a>
+      <a href="/elevator-dual.html">Dual-Weight</a>
+      <a href="/elevator-variable.html" class="active">Variable CW</a>
+    </div>
+  </nav>
+
+  <div id="title" class="panel">
+    <h1>Variable Counterweight System</h1>
+    <div class="sub">Rotary discharge · modular barbells · adaptive balance</div>
+    <div id="state"><span id="dot"></span><span id="stateTxt">running</span></div>
+  </div>
+
+  <div id="data" class="panel">
+    <h2>Live Telemetry</h2>
+    <div class="row"><span class="k">Passengers</span><span class="v c" id="d_pax">0</span></div>
+    <div class="row"><span class="k">Car load</span><span class="v" id="d_load">480 kg</span></div>
+    <div class="row"><span class="k">Counterweight</span><span class="v a" id="d_cwt">480 kg</span></div>
+    <div class="row"><span class="k">Active barbells</span><span class="v" id="d_n">0</span></div>
+    <div class="row"><span class="k">Status</span><span class="v g" id="d_status">balanced</span></div>
+    <div class="row"><span class="k">Energy harvested</span><span class="v g" id="d_egy">0.00 Wh</span></div>
+  </div>
+
+  <p id="hint">drag orbit · scroll zoom · shift-drag pan · <b>Mechanism</b> for rotary detail</p>
+
+  <div id="ctrl" class="panel">
+    <div class="grp">
+      <button id="btnPlay" class="act">❚❚ Pause</button>
+    </div>
+    <span class="sep"></span>
+    <div class="grp">
+      <span class="lbl">Passengers</span>
+      <button id="btnPaxDn" style="width: 26px">−</button>
+      <span id="paxVal">0</span>
+      <button id="btnPaxUp" style="width: 26px">+</button>
+    </div>
+    <span class="sep"></span>
+    <div class="grp views">
+      <span class="lbl">View</span>
+      <button data-cam="over" class="act">Overview</button>
+      <button data-cam="mech">Mechanism</button>
+      <button data-cam="cwt">Counterweight</button>
+      <button data-cam="cab">Cab</button>
+    </div>
+    <span class="sep"></span>
+    <div class="grp">
+      <button id="btnLabels" class="act">Labels</button>
+      <button id="btnOrbit" class="act">Auto-orbit</button>
+      <button id="btnUI">Hide UI</button>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+(function () {
+  'use strict';
+
+  const C = {
+    H: 9.5,
+    carW: 1.28,
+    carH: 2.1,
+    carD: 1.28,
+    carZ: 0.55,
+    cwZ: -0.82,
+    carMid: 4.3,
+    travel: 2.5,
+    paxMass: 75,
+    carEmpty: 480,
+    baseCwt: 480,
+    barbellMass: 80,
+    maxBarbells: 6,
+    rDrum: 0.28,
+  };
+
+  const M = {
+    steel: new THREE.MeshStandardMaterial({ color: 0x6f7884, metalness: 0.85, roughness: 0.45 }),
+    steelDk: new THREE.MeshStandardMaterial({ color: 0x3d454f, metalness: 0.8, roughness: 0.5 }),
+    rail: new THREE.MeshStandardMaterial({ color: 0xb6bdc6, metalness: 0.9, roughness: 0.3 }),
+    car: new THREE.MeshStandardMaterial({ color: 0xc9d1da, metalness: 0.55, roughness: 0.4 }),
+    door: new THREE.MeshStandardMaterial({ color: 0x2c5f73, metalness: 0.6, roughness: 0.45 }),
+    cw: new THREE.MeshStandardMaterial({ color: 0x4a525c, metalness: 0.8, roughness: 0.5 }),
+    cwPlate: new THREE.MeshStandardMaterial({ color: 0x5b646f, metalness: 0.85, roughness: 0.4 }),
+    drum: new THREE.MeshStandardMaterial({ color: 0x6b7480, metalness: 0.9, roughness: 0.35 }),
+    rope: new THREE.MeshStandardMaterial({ color: 0x9aa2ac, metalness: 0.7, roughness: 0.4 }),
+    bead: new THREE.MeshStandardMaterial({ color: 0x57d1e6, emissive: 0x0e3a44, roughness: 0.4 }),
+    rotary: new THREE.MeshStandardMaterial({ color: 0x7a8a9a, metalness: 0.85, roughness: 0.32 }),
+    rotaryHot: new THREE.MeshStandardMaterial({
+      color: 0x7a8a9a,
+      metalness: 0.85,
+      roughness: 0.32,
+      emissive: 0x18707a,
+      emissiveIntensity: 0,
+    }),
+    bbDisc: new THREE.MeshStandardMaterial({ color: 0x4f7da6, metalness: 0.65, roughness: 0.4 }),
+    bbHub: new THREE.MeshStandardMaterial({ color: 0x3a4a58, metalness: 0.8, roughness: 0.35 }),
+    coil: new THREE.MeshStandardMaterial({
+      color: 0xc05a2a,
+      metalness: 0.4,
+      roughness: 0.55,
+      emissive: 0x331100,
+      emissiveIntensity: 0.15,
+    }),
+    roller: new THREE.MeshStandardMaterial({ color: 0x3a8c4f, metalness: 0.4, roughness: 0.55 }),
+    gen: new THREE.MeshStandardMaterial({
+      color: 0x2f6b3d,
+      metalness: 0.6,
+      roughness: 0.45,
+      emissive: 0x16e06a,
+      emissiveIntensity: 0.2,
+    }),
+  };
+
+  function box(w, h, d, mat, x, y, z) {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+    m.position.set(x, y, z);
+    m.castShadow = true;
+    m.receiveShadow = true;
+    return m;
+  }
+
+  function makeBarbell() {
+    const g = new THREE.Group();
+    const discR = 0.14;
+    const discT = 0.045;
+    [-0.09, 0.09].forEach((y) => {
+      const d = new THREE.Mesh(new THREE.CylinderGeometry(discR, discR, discT, 24), M.bbDisc);
+      d.position.y = y;
+      d.castShadow = true;
+      g.add(d);
+    });
+    const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.16, 16), M.bbHub);
+    hub.castShadow = true;
+    g.add(hub);
+    for (let i = 0; i < 4; i++) {
+      const a = (i * Math.PI) / 2;
+      const peg = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.03, 10), M.roller);
+      peg.rotation.z = Math.PI / 2;
+      peg.position.set(Math.cos(a) * 0.055, 0, Math.sin(a) * 0.055);
+      g.add(peg);
+    }
+    for (const yy of [-0.04, 0.04]) {
+      const coil = new THREE.Mesh(new THREE.TorusGeometry(0.042, 0.007, 8, 20), M.coil);
+      coil.rotation.x = Math.PI / 2;
+      coil.position.y = yy;
+      g.add(coil);
+    }
+    g.userData.h = 0.22;
+    return g;
+  }
+
+  function buildRotaryStation() {
+    const g = new THREE.Group();
+    const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.07, 32), M.rotary);
+    plate.castShadow = true;
+    g.add(plate);
+    for (let i = 0; i < 4; i++) {
+      const a = (i * Math.PI) / 2;
+      const slot = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.06, 0.14), M.steelDk);
+      slot.position.set(Math.cos(a) * 0.17, 0.02, Math.sin(a) * 0.17);
+      slot.rotation.y = -a;
+      g.add(slot);
+    }
+    const spindle = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.2, 14), M.steelDk);
+    spindle.position.y = 0.14;
+    g.add(spindle);
+    const knob = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.055, 0.05, 18), M.steel);
+    knob.position.y = 0.28;
+    g.add(knob);
+    const port = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.012, 10, 28), M.steelDk);
+    port.rotation.x = Math.PI / 2;
+    port.position.y = -0.02;
+    g.add(port);
+    [[0.3, 0.3], [-0.3, 0.3], [0.3, -0.3], [-0.3, -0.3]].forEach(([x, z]) => {
+      g.add(box(0.04, 0.22, 0.04, M.steelDk, x, -0.08, z));
+    });
+    return g;
+  }
+
+  // ─── Scene ───
+  const app = document.getElementById('app');
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  app.appendChild(renderer.domElement);
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color('#0c0f14');
+  scene.fog = new THREE.Fog('#0c0f14', 18, 48);
+
+  const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.05, 120);
+  const controls = {
+    target: new THREE.Vector3(0, 4.5, 0),
+    theta: 0.65,
+    phi: 1.1,
+    radius: 14,
+    auto: true,
+    pan: new THREE.Vector3(),
+  };
+
+  scene.add(new THREE.HemisphereLight('#cfe3ff', '#0a0d12', 0.55));
+  const key = new THREE.DirectionalLight('#fff4e0', 1.25);
+  key.position.set(7, 14, 9);
+  key.castShadow = true;
+  key.shadow.mapSize.set(2048, 2048);
+  scene.add(key);
+  const fill = new THREE.DirectionalLight('#5d7fbf', 0.45);
+  fill.position.set(-8, 6, -6);
+  scene.add(fill);
+  const rim = new THREE.DirectionalLight('#8fe6ff', 0.35);
+  rim.position.set(-3, 9, 8);
+  scene.add(rim);
+
+  const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(40, 40),
+    new THREE.MeshStandardMaterial({ color: 0x0a0d12, roughness: 1 })
+  );
+  floor.rotation.x = -Math.PI / 2;
+  floor.receiveShadow = true;
+  scene.add(floor);
+  scene.add(new THREE.GridHelper(40, 40, 0x1f3140, 0x14202b));
+
+  const root = new THREE.Group();
+  scene.add(root);
+
+  const halfW = 1.05;
+  const halfD = 0.95;
+  [[halfW, halfD], [-halfW, halfD], [halfW, -halfD], [-halfW, -halfD]].forEach(([x, z]) => {
+    root.add(box(0.1, C.H, 0.1, M.steelDk, x, C.H / 2, z));
+  });
+  for (let y = 0; y <= C.H; y += C.H / 4) {
+    root.add(box(2.2, 0.08, 0.08, M.steelDk, 0, y, halfD));
+    root.add(box(2.2, 0.08, 0.08, M.steelDk, 0, y, -halfD));
+    root.add(box(0.08, 0.08, 2.0, M.steelDk, -halfW, y, 0));
+    root.add(box(0.08, 0.08, 2.0, M.steelDk, halfW, y, 0));
+  }
+  root.add(box(2.3, 0.18, 2.1, M.steel, 0, C.H + 0.08, 0));
+
+  [0.9, -0.9].forEach((x) => root.add(box(0.06, C.H - 0.4, 0.1, M.rail, x, C.H / 2, C.carZ)));
+  [0.3, -0.3].forEach((x) => root.add(box(0.05, C.H - 0.4, 0.1, M.rail, x, C.H / 2, C.cwZ)));
+
+  const drumY = C.H - 0.12;
+  const drum = new THREE.Mesh(new THREE.CylinderGeometry(C.rDrum, C.rDrum, 0.32, 32), M.drum);
+  drum.rotation.z = Math.PI / 2;
+  drum.position.set(0, drumY, (C.carZ + C.cwZ) / 2);
+  drum.castShadow = true;
+  root.add(drum);
+
+  // Car
+  const car = new THREE.Group();
+  root.add(car);
+  car.add(box(C.carW, C.carH, C.carD, M.car, 0, 0, 0));
+  car.add(box(C.carW + 0.06, 0.06, C.carD + 0.06, M.steel, 0, C.carH / 2, 0));
+  car.add(box(C.carW + 0.06, 0.06, C.carD + 0.06, M.steel, 0, -C.carH / 2, 0));
+  for (let i = 0; i < 6; i++) {
+    car.add(box(C.carW * 0.88, 0.22, 0.03, M.door, 0, -0.75 + i * 0.3, C.carD / 2 + 0.02));
+  }
+  car.add(box(0.14, 0.12, 0.2, M.steelDk, 0, C.carH / 2 + 0.2, 0));
+  [[1, 0.35], [-1, 0.35]].forEach(([s, z]) => {
+    const rg = new THREE.Group();
+    rg.add(box(0.08, 0.08, 0.08, M.steelDk, 0, 0, 0));
+    const w = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.035, 16), M.roller);
+    w.rotation.z = Math.PI / 2;
+    w.position.x = s * 0.06;
+    rg.add(w);
+    rg.position.set(s * (C.carW / 2 + 0.06), 0.2, z);
+    car.add(rg);
+  });
+  car.position.set(0, C.carMid, C.carZ);
+
+  // Counterweight column
+  const cwtCol = new THREE.Group();
+  root.add(cwtCol);
+  cwtCol.position.set(0, C.carMid, C.cwZ);
+
+  const baseH = 0.42;
+  cwtCol.add(box(0.62, baseH, 0.5, M.cw, 0, baseH / 2, 0));
+  const genCoil = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.08, 16), M.gen);
+  genCoil.position.y = -0.02;
+  cwtCol.add(genCoil);
+
+  const barbellStack = new THREE.Group();
+  barbellStack.position.y = baseH + 0.02;
+  cwtCol.add(barbellStack);
+
+  const rotary = buildRotaryStation();
+  const rotaryWrap = new THREE.Group();
+  rotaryWrap.add(rotary);
+  cwtCol.add(rotaryWrap);
+
+  const guidePin = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.014, 0.014, 0.5, 10),
+    M.steelDk
+  );
+  guidePin.position.y = baseH + 0.35;
+  cwtCol.add(guidePin);
+
+  function layoutStack() {
+    let y = 0;
+    activeBarbells.forEach((b) => {
+      b.position.set(0, y + b.userData.h / 2, 0);
+      y += b.userData.h + 0.03;
+    });
+    rotaryWrap.position.y = baseH + 0.08 + y + 0.12;
+    guidePin.position.y = baseH + 0.15 + y * 0.45;
+    guidePin.scale.y = 0.4 + y * 1.2;
+  }
+
+  // Storage rack (machine room)
+  const storage = new THREE.Group();
+  storage.position.set(0.55, C.H - 0.5, C.cwZ - 0.15);
+  root.add(storage);
+  storage.add(box(0.9, 0.05, 0.42, M.cwPlate, 0, 0.35, 0));
+  storage.add(box(0.9, 0.05, 0.42, M.cwPlate, 0, -0.02, 0));
+  [[0.42, 0.2], [-0.42, 0.2]].forEach(([x, z]) => storage.add(box(0.04, 0.32, 0.04, M.steelDk, x, 0.14, z)));
+
+  const storageBarbells = [];
+  for (let i = 0; i < C.maxBarbells; i++) {
+    const b = makeBarbell();
+    b.rotation.z = Math.PI / 2;
+    b.position.set(-0.32 + (i % 3) * 0.32, i < 3 ? 0.42 : 0.08, 0);
+    storage.add(b);
+    storageBarbells.push(b);
+  }
+
+  const activeBarbells = [];
+  const flight = makeBarbell();
+  flight.visible = false;
+  root.add(flight);
+
+  // Ropes + beads
+  function ropeCyl() {
+    const r = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 1, 8), M.rope);
+    r.castShadow = true;
+    root.add(r);
+    return r;
+  }
+  const ropeCar = ropeCyl();
+  const ropeCw = ropeCyl();
+  const beads = [];
+  for (let i = 0; i < 12; i++) {
+    const b = new THREE.Mesh(new THREE.SphereGeometry(0.028, 8, 8), M.bead);
+    root.add(b);
+    beads.push(b);
+  }
+  function setRope(cyl, topY, botY, x, z) {
+    const h = Math.max(0.02, topY - botY);
+    cyl.scale.y = h;
+    cyl.position.set(x, (topY + botY) / 2, z);
+  }
+
+  // State
+  const S = {
+    pax: 0,
+    paxDemo: 0,
+    demoT: 0,
+    energy: 0,
+    transferring: false,
+    transferT: 0,
+    transferDir: 0,
+    rotarySpeed: 0,
+    playing: true,
+    labels: true,
+    beadOff: 0,
+    carY: C.carMid,
+    cwtY: C.carMid,
+  };
+
+  function targetN(pax) {
+    return Math.max(0, Math.min(C.maxBarbells, Math.round((pax * C.paxMass) / C.barbellMass)));
+  }
+
+  function updateStorageVis() {
+    storageBarbells.forEach((b, i) => {
+      b.visible = i >= activeBarbells.length;
+    });
+  }
+
+  function requestAdjust() {
+    const want = targetN(S.pax);
+    if (want > activeBarbells.length && !S.transferring) startTransfer(1);
+    else if (want < activeBarbells.length && !S.transferring) startTransfer(-1);
+  }
+
+  function startTransfer(dir) {
+    S.transferring = true;
+    S.transferT = 0;
+    S.transferDir = dir;
+    S.rotarySpeed = 6;
+    if (dir > 0) {
+      const src = storageBarbells.find((b) => b.visible);
+      if (src) src.visible = false;
+      flight.visible = true;
+      flight.rotation.set(0, 0, 0);
+      flight.position.set(storage.position.x, C.H - 0.42, storage.position.z);
+    } else {
+      const top = activeBarbells.pop();
+      if (top) barbellStack.remove(top);
+      layoutStack();
+      flight.visible = true;
+      flight.rotation.set(0, 0, 0);
+      flight.position.set(cwtCol.position.x, cwtCol.position.y + rotaryWrap.position.y, cwtCol.position.z);
+    }
+  }
+
+  function tickTransfer(dt) {
+    if (!S.transferring) return;
+    const dur = 2.4;
+    S.transferT += dt;
+    const t = Math.min(1, S.transferT / dur);
+    let stackY = baseH + 0.1;
+    activeBarbells.forEach((b) => {
+      stackY += b.userData.h + 0.03;
+    });
+    const dropLocal = stackY;
+    const intakeY = cwtCol.position.y + rotaryWrap.position.y;
+    const storageY = C.H - 0.42;
+
+    if (S.transferDir > 0) {
+      if (t < 0.28) {
+        const k = t / 0.28;
+        flight.position.lerpVectors(
+          new THREE.Vector3(storage.position.x, storageY, storage.position.z),
+          new THREE.Vector3(0, intakeY + 0.15, C.cwZ),
+          k
+        );
+      } else if (t < 0.48) {
+        flight.position.set(0, intakeY + 0.1 - 0.15 * ((t - 0.28) / 0.2), C.cwZ);
+      } else {
+        const k = (t - 0.48) / 0.52;
+        flight.position.set(0, (intakeY + 0.05) * (1 - k) + (cwtCol.position.y + dropLocal) * k, C.cwZ);
+        S.energy += C.barbellMass * 9.81 * 0.035 * dt;
+      }
+      if (t >= 1) {
+        S.transferring = false;
+        S.rotarySpeed = 0;
+        flight.visible = false;
+        const nb = makeBarbell();
+        barbellStack.add(nb);
+        activeBarbells.push(nb);
+        layoutStack();
+        updateStorageVis();
+        if (targetN(S.pax) !== activeBarbells.length) setTimeout(requestAdjust, 500);
+      }
+    } else {
+      if (t < 0.42) {
+        const k = t / 0.42;
+        flight.position.set(
+          0,
+          (cwtCol.position.y + dropLocal) * (1 - k) + (intakeY + 0.05) * k,
+          C.cwZ
+        );
+      } else if (t < 0.62) {
+        flight.position.y = intakeY + 0.12 * ((t - 0.42) / 0.2);
+      } else {
+        const k = (t - 0.62) / 0.38;
+        flight.position.lerpVectors(
+          new THREE.Vector3(0, intakeY + 0.12, C.cwZ),
+          new THREE.Vector3(storage.position.x, storageY, storage.position.z),
+          k
+        );
+      }
+      if (t >= 1) {
+        S.transferring = false;
+        S.rotarySpeed = 0;
+        flight.visible = false;
+        const slot = storageBarbells.find((b) => !b.visible);
+        if (slot) slot.visible = true;
+        updateStorageVis();
+        if (targetN(S.pax) !== activeBarbells.length) setTimeout(requestAdjust, 500);
+      }
+    }
+    rotaryWrap.rotation.y += S.rotarySpeed * dt;
+    M.rotaryHot.emissiveIntensity = S.transferring ? 0.35 + 0.25 * Math.sin(S.transferT * 12) : 0;
+    rotary.children[0].material = S.transferring ? M.rotaryHot : M.rotary;
+  }
+
+  function tickMotion(dt) {
+    const carM = C.carEmpty + S.pax * C.paxMass;
+    const cwtM = C.baseCwt + activeBarbells.length * C.barbellMass;
+    const delta = cwtM - carM;
+
+    if (!S.transferring) {
+      const target = C.carMid + Math.sign(delta) * Math.min(Math.abs(delta) * 0.004, C.travel / 2);
+      S.carY += (target - S.carY) * Math.min(1, dt * 1.2);
+      S.cwtY = C.carMid - (S.carY - C.carMid);
+    }
+
+    car.position.y = S.carY;
+    cwtCol.position.y = S.cwtY;
+
+    const regen = S.transferring && S.transferDir > 0;
+    document.getElementById('dot').classList.toggle('on', regen);
+    document.getElementById('stateTxt').textContent = regen
+      ? 'HARVESTING — barbell drop'
+      : Math.abs(delta) < C.barbellMass * 0.5
+        ? 'balanced'
+        : 'rebalancing';
+
+    document.getElementById('d_pax').textContent = S.pax;
+    document.getElementById('paxVal').textContent = S.pax;
+    document.getElementById('d_load').textContent = carM.toFixed(0) + ' kg';
+    document.getElementById('d_cwt').textContent = cwtM.toFixed(0) + ' kg';
+    document.getElementById('d_n').textContent =
+      activeBarbells.length + (S.transferring ? ' ±1' : '');
+    document.getElementById('d_status').textContent = S.transferring
+      ? S.transferDir > 0
+        ? 'deploying barbell ↓'
+        : 'retrieving barbell ↑'
+      : Math.abs(delta) < C.barbellMass * 0.5
+        ? 'balanced'
+        : 'rebalancing';
+    document.getElementById('d_egy').textContent = (S.energy / 3600).toFixed(2) + ' Wh';
+
+    const carTop = S.carY + C.carH / 2 + 0.25;
+    const cwTop = S.cwtY + rotaryWrap.position.y + 0.35;
+    setRope(ropeCar, drumY, carTop, 0.15, C.carZ);
+    setRope(ropeCw, drumY, cwTop, -0.12, C.cwZ);
+
+    const vel = S.transferring ? 0.15 : Math.abs(delta) * 0.002;
+    S.beadOff += vel * dt;
+    beads.forEach((b, i) => {
+      const half = beads.length / 2;
+      if (i < half) {
+        const f = (((i / half) + S.beadOff) % 1);
+        b.position.set(0.15, carTop + (drumY - carTop) * f, C.carZ);
+      } else {
+        const f = ((((i - half) / half) - S.beadOff + 1) % 1);
+        b.position.set(-0.12, cwTop + (drumY - cwTop) * f, C.cwZ);
+      }
+    });
+  }
+
+  function tickDemo(dt) {
+    if (!S.playing || S.transferring) return;
+    S.demoT += dt;
+    if (S.demoT > 4.5) {
+      S.demoT = 0;
+      S.paxDemo = (S.paxDemo + 1) % 13;
+      S.pax = S.paxDemo <= 6 ? S.paxDemo : 12 - S.paxDemo;
+      requestAdjust();
+    }
+  }
+
+  // Labels
+  const TAGS = [
+    { txt: 'Rotary discharge station', cls: 'green', p: () => new THREE.Vector3(0.35, S.cwtY + rotaryWrap.position.y + 0.35, C.cwZ) },
+    { txt: 'Modular barbell masses', cls: 'amber', p: () => new THREE.Vector3(0.48, S.cwtY + baseH + 0.35, C.cwZ) },
+    { txt: 'Cabled base mass', cls: '', p: () => new THREE.Vector3(-0.42, S.cwtY + baseH / 2, C.cwZ) },
+    { txt: 'Storage rack', cls: '', p: () => new THREE.Vector3(storage.position.x + 0.45, storage.position.y, storage.position.z) },
+    { txt: 'Elevator car', cls: '', p: () => new THREE.Vector3(0, S.carY + C.carH / 2 + 0.5, C.carZ + 0.65) },
+    { txt: 'Hoist sheave', cls: 'amber', p: () => new THREE.Vector3(0, drumY + 0.4, (C.carZ + C.cwZ) / 2) },
+  ];
+  const tagEls = TAGS.map((d) => {
+    const e = document.createElement('div');
+    e.className = 'tag ' + d.cls;
+    e.textContent = d.txt;
+    app.appendChild(e);
+    return e;
+  });
+
+  const CAMS = {
+    over: { t: [0, 4.6, 0.15], th: 0.6, phi: 1.08, r: 13 },
+    mech: { t: [0.35, S.cwtY + 5.5, C.cwZ], th: 0.75, phi: 0.92, r: 2.2 },
+    cwt: { t: [0, 4.2, C.cwZ], th: 0.55, phi: 1.15, r: 4.5 },
+    cab: { t: [0, 4.2, C.carZ + 0.7], th: 0.65, phi: 1.1, r: 5 },
+  };
+
+  function applyCam() {
+    const t = controls.target.clone().add(controls.pan);
+    const r = controls.radius;
+    const p = controls.phi;
+    const th = controls.theta;
+    camera.position.set(
+      t.x + r * Math.sin(p) * Math.sin(th),
+      t.y + r * Math.cos(p),
+      t.z + r * Math.sin(p) * Math.cos(th)
+    );
+    camera.lookAt(t);
+  }
+
+  function goCam(k) {
+    const c = CAMS[k];
+    controls.target.set(c.t[0], c.t[1], c.t[2]);
+    controls.theta = c.th;
+    controls.phi = c.phi;
+    controls.radius = c.r;
+    controls.pan.set(0, 0, 0);
+    if (k === 'mech') {
+      controls.target.set(0.3, S.cwtY + rotaryWrap.position.y + 0.2, C.cwZ);
+    }
+  }
+  goCam('over');
+
+  // Pointer controls
+  (function () {
+    const el = renderer.domElement;
+    let dn = false,
+      sx = 0,
+      sy = 0,
+      sh = false;
+    el.addEventListener('pointerdown', (e) => {
+      dn = true;
+      sx = e.clientX;
+      sy = e.clientY;
+      sh = e.shiftKey;
+    });
+    addEventListener('pointerup', () => (dn = false));
+    addEventListener('pointermove', (e) => {
+      if (!dn) return;
+      const dx = e.clientX - sx,
+        dy = e.clientY - sy;
+      sx = e.clientX;
+      sy = e.clientY;
+      if (sh) {
+        const s = controls.radius * 0.0016;
+        controls.pan.y += dy * s;
+      } else {
+        controls.theta -= dx * 0.006;
+        controls.phi = Math.max(0.15, Math.min(2.85, controls.phi - dy * 0.006));
+      }
+    });
+    el.addEventListener(
+      'wheel',
+      (e) => {
+        e.preventDefault();
+        controls.radius = Math.max(1.8, Math.min(40, controls.radius * (1 + Math.sign(e.deltaY) * 0.08)));
+      },
+      { passive: false }
+    );
+  })();
+
+  // UI
+  document.getElementById('btnPlay').onclick = function () {
+    S.playing = !S.playing;
+    this.textContent = S.playing ? '❚❚ Pause' : '▶ Play';
+    this.classList.toggle('act', S.playing);
+  };
+  document.getElementById('btnPaxDn').onclick = () => {
+    S.pax = Math.max(0, S.pax - 1);
+    S.paxDemo = S.pax;
+    requestAdjust();
+  };
+  document.getElementById('btnPaxUp').onclick = () => {
+    S.pax = Math.min(10, S.pax + 1);
+    S.paxDemo = S.pax;
+    requestAdjust();
+  };
+  document.querySelectorAll('[data-cam]').forEach((b) => {
+    b.onclick = () => {
+      goCam(b.dataset.cam);
+      document.querySelectorAll('[data-cam]').forEach((x) => x.classList.remove('act'));
+      b.classList.add('act');
+    };
+  });
+  document.getElementById('btnLabels').onclick = function () {
+    S.labels = !S.labels;
+    this.classList.toggle('act', S.labels);
+  };
+  document.getElementById('btnOrbit').onclick = function () {
+    controls.auto = !controls.auto;
+    this.classList.toggle('act', controls.auto);
+  };
+  let uiHidden = false;
+  const uiHide = ['site-nav', 'title', 'data', 'ctrl', 'hint'];
+  document.getElementById('btnUI').onclick = () => {
+    uiHidden = !uiHidden;
+    uiHide.forEach((id) => {
+      const el = document.getElementById(id) || document.querySelector('.' + id);
+      if (el) el.style.display = uiHidden ? 'none' : '';
+    });
+    document.querySelector('.site-nav').style.display = uiHidden ? 'none' : 'flex';
+  };
+  addEventListener('keydown', (e) => {
+    if (e.key === 'h' || e.key === 'H') document.getElementById('btnUI').click();
+  });
+
+  layoutStack();
+  updateStorageVis();
+  requestAdjust();
+
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    if (S.playing) {
+      tickDemo(dt);
+      tickTransfer(dt);
+      tickMotion(dt);
+    }
+    if (controls.auto) controls.theta += dt * 0.16;
+    CAMS.mech.t[1] = S.cwtY + rotaryWrap.position.y + 0.5;
+    applyCam();
+    tagEls.forEach((e, i) => {
+      if (!S.labels || uiHidden) {
+        e.style.opacity = 0;
+        return;
+      }
+      const v = TAGS[i].p().project(camera);
+      if (v.z > 1) {
+        e.style.opacity = 0;
+        return;
+      }
+      e.style.opacity = 0.95;
+      e.style.left = (v.x * 0.5 + 0.5) * innerWidth + 'px';
+      e.style.top = (-v.y * 0.5 + 0.5) * innerHeight + 'px';
+    });
+    renderer.render(scene, camera);
+    requestAnimationFrame(frame);
+  }
+  addEventListener('resize', () => {
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+  });
+  requestAnimationFrame(frame);
+})();
+  </script>
+</body>
+</html>

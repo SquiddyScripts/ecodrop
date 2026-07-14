@@ -1,0 +1,247 @@
+================================================================================
+GRAPH-BY-GRAPH EXPLANATIONS — FOR JUDGE Q&A
+All four system dashboards: what each plot shows, why it looks that way, and what we learned
+================================================================================
+
+--- 1. BUOYANCY GRAVITY BATTERY — Time-Series ---
+
+(1) Buoyant weight height [Height vs Time]
+• What it shows: Vertical position of the buoyant weight over one full cycle.
+• Why it looks this way: The weight starts low, is lifted to a maximum (charge), may hold briefly, then descends (discharge). The curves are smooth because we use controlled velocity profiles—no sudden stops.
+• Why that makes sense: This is the physical stroke of the storage cycle. How high we lift sets the potential energy we can recover on drop.
+• How it gave us info: Defines the stroke length and cycle duration; we use height and time to compute velocity and then power and energy.
+
+(2) Weight velocity (+ up, - down) [Velocity vs Time]
+• What it shows: Vertical speed and direction of the buoyant weight; positive = up, negative = down.
+• Why it looks this way: It follows the height curve: positive during ascent, negative during descent, zero at the top and bottom. Parabolic-looking segments show acceleration and deceleration (we use smooth profiles like 4*τ*(1-τ) so the weight doesn’t jerk).
+• Why that makes sense: Power is force × velocity; we need velocity to get instantaneous mechanical power and to integrate for energy.
+• How it gave us info: Gave us the dynamics for mechanical power (m*g*v) during drop and for sizing the hoist and generator.
+
+(3) Water levels (chamber and reservoir) [Chamber fill %, Top reservoir % vs Time]
+• What it shows: How full the chamber (where the weight sits) and the top reservoir are over time.
+• Why it looks this way: During lift, the chamber empties and the reservoir fills (pump moves water out of the chamber). During the water phase and drop, water can flow back or levels change so the weight can descend; the chamber fill and reservoir fill move in opposite directions to reflect water being moved between them.
+• Why that makes sense: In a buoyancy system, we change effective weight or buoyancy by moving water. Pumping water out of the chamber reduces buoyancy so the weight can be lifted; refilling or allowing flow back helps control the drop.
+• How it gave us info: Shows the hydraulic mechanism and when the pump is working; we use this to assign pump power and to explain consumption during the lift/water phases.
+
+(4) Motor and pump (consumption) [Power vs Time]
+• What it shows: Electrical power consumed by the hoist motor (lifting the weight) and by the pump (moving water).
+• Why it looks this way: Both are active mainly during the lift phase; we model them with smooth profiles (e.g. a bump during lift). Pump may also run during a “water” phase if we have one.
+• Why that makes sense: You must spend energy to lift the weight and to run the pump; that’s the “charge” cost of the cycle.
+• How it gave us info: Quantifies energy input; we integrate this to get total consumed energy and then round-trip efficiency (generated/consumed).
+
+(5) Generator output (drop phase) [Power vs Time]
+• What it shows: Electrical power generated while the weight is descending.
+• Why it looks this way: One main peak during the drop—power rises as the weight accelerates and then falls as it decelerates or reaches the bottom. Shape matches our velocity and generator-efficiency model.
+• Why that makes sense: Descending weight does work on the generator; electrical output follows mechanical power minus losses.
+• How it gave us info: Direct measure of “discharge” power; we integrate to get generated energy and compare to consumption for efficiency.
+
+(6) Charge vs discharge power [Power vs Time, combined]
+• What it shows: Same as (4) and (5) but on one plot—motor and pump (consumption) vs generator (generation) over the cycle.
+• Why it looks this way: Consumption dominates early (lift + pump), generation appears during the drop; the areas under the curves are proportional to consumed and generated energy.
+• Why that makes sense: Puts input and output side by side so we can see the balance and when each happens.
+• How it gave us info: Quick visual check of the power balance and phase split; supports the cumulative energy and pie chart.
+
+(7) Cumulative energy [Energy vs Time]
+• What it shows: Running total of Consumed, Generated, and Net (generated minus consumed) energy over the cycle.
+• Why it looks this way: Consumed ramps up during lift/pump; Generated ramps up during drop. Net goes negative during charge and then rises during discharge but usually stays negative (net loss per cycle).
+• Why that makes sense: Energy is the integral of power; cumulative curves show how much we’ve put in and taken out at any time.
+• How it gave us info: Final values give total consumed, total generated, and net per cycle—the basis for round-trip efficiency and for the pie chart.
+
+(8) Cycle energy split [Pie chart]
+• What it shows: One cycle’s total “Consumed (lift + pump)” vs “Generated (drop)” as two slices.
+• Why it looks this way: Two slices whose sizes are proportional to total consumed and total generated. If consumed is bigger (typical), that slice is larger.
+• Why that makes sense: Round-trip efficiency is generated/consumed; the pie shows that ratio at a glance.
+• How it gave us info: Quick visual of whether we’re close to break-even or how much we lose per cycle.
+
+(9) Weight phase portrait (h vs v) [Velocity vs Height]
+• What it shows: Trajectory of the weight in “state space”—velocity vs height—over one cycle.
+• Why it looks this way: A closed loop: as height goes up, velocity goes up then down; as height goes down, velocity goes negative then back to zero. Smooth because our motion profiles are smooth.
+• Why that makes sense: In a cyclic process, the system returns to the same state; the loop shows how it gets there and confirms no impossible behavior (e.g. two velocities at one height).
+• How it gave us info: Checks consistency of the motion model and is useful for discussing control and stability with judges.
+
+
+--- 2. DUAL WEIGHT REGENERATION SYSTEM — Time-Series ---
+
+(1) Cab and counterweight height [Height vs Time]
+• What it shows: Vertical positions of the cab (main mass) and the counterweight over time.
+• Why it looks this way: They move in opposite directions: when the cab goes down, the counterweight goes up, and vice versa. Two curves that mirror each other.
+• Why that makes sense: It’s an elevator-style system; the cable wraps around a drum so one side goes up when the other goes down. The counterweight balances most of the cab weight so the motor only works against the net imbalance (e.g. 50 kg).
+• How it gave us info: Confirms the kinematic constraint and shows the stroke; we use the cab motion to compute mechanical power at the drum (net mass × g × velocity).
+
+(2) Cab and counterweight velocity [Velocity vs Time]
+• What it shows: Vertical speeds of cab and counterweight; sign convention: up positive, down negative.
+• Why it looks this way: Same magnitude but opposite signs (they move in opposite directions at the same speed). Positive when cab is rising, negative when cab is falling.
+• Why that makes sense: The cable is inelastic; one side’s speed equals the other’s.
+• How it gave us info: We use cab velocity (or equivalently counterweight velocity) with the net mass to get mechanical power and then electrical power (generation on descent, consumption on ascent).
+
+(3) Mechanical and electrical power [P_mech, P_elec vs Time]
+• What it shows: Mechanical power at the drum (from gravity and motion) and electrical power (after motor/generator conversion). Convention: generation positive, consumption negative for electrical.
+• Why it looks this way: Mechanical power is positive when the cab descends (gravity does work on the system) and negative when the cab ascends. Electrical power follows but with reduced magnitude because of efficiency losses (η_gen on descent, 1/η_drive on ascent).
+• Why that makes sense: The motor/generator converts mechanical to electrical; losses make electrical magnitude smaller than mechanical.
+• How it gave us info: Shows the conversion chain and where losses appear; we integrate electrical power to get generated and consumed energy.
+
+(4) Regeneration vs consumption [Power vs Time, areas]
+• What it shows: Same power flows as (3) but as positive areas: “Generated” during descent and “Consumed” during ascent.
+• Why it looks this way: Two separate regions in time—one for regeneration (descent) and one for consumption (ascent). Areas are proportional to energy in each phase.
+• Why that makes sense: Splits the cycle into “when we get energy back” and “when we put energy in.”
+• How it gave us info: Clear visual of charge vs discharge phases and relative sizes; supports the cumulative energy and efficiency numbers.
+
+(5) Regeneration efficiency (descent phase) [Efficiency % vs Time]
+• What it shows: Instantaneous conversion efficiency during the descent (regeneration) phase only.
+• Why it looks this way: Often starts lower (low speed), peaks in the middle, then may drop again at the end. We model it with a simple curve (e.g. ramping up with time or speed).
+• Why that makes sense: Real motors/generators don’t have constant efficiency; it varies with speed and load.
+• How it gave us info: Explains why we don’t get 100% of mechanical power as electrical; we use this (or an average) in the power conversion model.
+
+(6) Motor / generator current [Current vs Time]
+• What it shows: Current in the motor/generator. Direction or sign may change when switching from motoring (ascent) to generating (descent).
+• Why it looks this way: One sign during ascent (consuming), opposite or different magnitude during descent (generating). Shape often follows power (e.g. peaks when power peaks).
+• Why that makes sense: Same machine acts as motor (draws current) and generator (supplies current); current reflects torque and power.
+• How it gave us info: Useful for electrical design and for explaining that one device does both jobs; supports the power and energy story.
+
+(7) Cumulative energy [Energy vs Time]
+• What it shows: Running totals of Generated, Consumed, and Net energy over the cycle.
+• Why it looks this way: Generated increases during descent; Consumed increases during ascent. Net = Generated − Consumed; it typically ends negative (more consumed than generated).
+• Why that makes sense: Same idea as buoyancy—integration of power over time.
+• How it gave us info: Final values give round-trip efficiency (generated/consumed) and net energy per cycle for the comparison.
+
+(8) Cycle energy split [Pie chart]
+• What it shows: Total “Regenerated” vs “Consumed” in one cycle.
+• Why it looks this way: Two slices; usually Consumed is larger (efficiency < 100%).
+• Why that makes sense: Same as other systems—visual summary of the energy balance.
+• How it gave us info: Quick judge-friendly view of how much we get back relative to what we put in.
+
+(9) Cab phase portrait (h vs v) [Cab velocity vs Cab height]
+• What it shows: Trajectory of the cab in state space (height vs velocity) over one cycle.
+• Why it looks this way: Closed loop: ascent (height increasing, velocity positive then zero at top), descent (height decreasing, velocity negative then zero at bottom).
+• Why that makes sense: Confirms one continuous cycle and consistent kinematics.
+• How it gave us info: Validates the motion model and helps explain dynamic behavior to judges.
+
+
+--- 3. ELECTROMAGNETIC (HALBACH) GRAVITY STORAGE — Time-Series ---
+
+(1) Weight position (linear travel) [Height vs Time]
+• What it shows: Vertical position of the main weight over time (linear motor moves it along a track).
+• Why it looks this way: Low → lift to peak (charge) → optional hold → drop back down (discharge). Smooth curves from our position/velocity profiles.
+• Why that makes sense: Same idea as other systems: lift to store potential energy, drop to recover it. “Linear travel” means the weight moves in a straight line (e.g. vertical or inclined) driven by linear motors (we use Halbach arrays in the motor design).
+• How it gave us info: Defines stroke and timing; we use it to get velocity and then force and power.
+
+(2) Weight velocity (+ up, - down) [Velocity vs Time]
+• What it shows: Vertical speed and direction of the weight.
+• Why it looks this way: Positive during lift, negative during drop; smooth peaks from our profiles (e.g. sine or polynomial).
+• Why that makes sense: Needed for mechanical power (force × velocity) and for generator output during drop.
+• How it gave us info: Feeds into thrust (force), mechanical power, and regeneration power.
+
+(3) Linear motor thrust (4 motors combined) [Thrust vs Time]
+• What it shows: Total force (thrust) from the four linear motors combined.
+• Why it looks this way: Positive thrust during lift (motors push the weight up against gravity); during drop the motors can act as generators, so you might see a resistive force or a different thrust profile. We model force from weight and efficiency (e.g. F_grav/η_lift for consumption).
+• Why that makes sense: Linear motors provide force along the track; thrust must balance or exceed weight to lift, and during drop the machine can brake and generate.
+• How it gave us info: Links force to power (P = F×v) for both consumption (lift) and generation (drop).
+
+(4) Consumption: linear motors and hoist [Power vs Time]
+• What it shows: Electrical power consumed by the linear motors and by the hoist (e.g. tension or clamping) during the lift and hold phases.
+• Why it looks this way: Both are on during lift; hoist may stay on during a short hold. Peaks when velocity and force are high.
+• Why that makes sense: You need to power the linear motors to lift the weight and any auxiliary hoist for safety or positioning.
+• How it gave us info: Total consumption = linear motors + hoist; we integrate to get consumed energy for efficiency.
+
+(5) Regeneration (drop phase) [Power vs Time]
+• What it shows: Electrical power generated during the drop phase when the linear motors act as generators.
+• Why it looks this way: A peak during drop—power follows weight × velocity × generator efficiency. Shape matches our velocity and efficiency model.
+• Why that makes sense: Falling weight does work on the linear machines; they convert that to electrical output.
+• How it gave us info: We integrate to get generated energy; with consumption this gives round-trip efficiency and net energy.
+
+(6) Phase current (6-phase, one phase shown) [Current vs Time]
+• What it shows: Current in one phase of the 6-phase linear motor/generator system.
+• Why it looks this way: AC-like or varying waveform; magnitude and sign can change between motoring (lift) and generating (drop). We may use a simplified shape for display.
+• Why that makes sense: Linear motors are often multi-phase AC; current reflects torque and power.
+• How it gave us info: Shows that the electromagnetic system has real electrical structure (phases, current); good for discussing design with judges.
+
+(7) Charge vs discharge power [Power vs Time, combined]
+• What it shows: Linear motor consumption, hoist consumption, and regeneration on one plot.
+• Why it looks this way: Consumption during lift (and hold); regeneration during drop. Same idea as other “charge vs discharge” plots.
+• Why that makes sense: One picture of when we use power and when we produce it.
+• How it gave us info: Visual balance of the cycle and support for cumulative energy and efficiency.
+
+(8) Cycle energy split [Pie chart]
+• What it shows: “Consumed (lift + hoist)” vs “Generated (drop)” for one cycle.
+• Why it looks this way: Two slices; typically consumed is larger (efficiency < 100%).
+• Why that makes sense: Same as other systems.
+• How it gave us info: Quick efficiency summary for the electromagnetic system.
+
+(9) Phase portrait (position vs velocity) [Velocity vs Position]
+• What it shows: Weight’s trajectory in state space (position vs velocity).
+• Why it looks this way: Closed loop: lift (position up, velocity up then down), drop (position down, velocity negative then back to zero).
+• Why that makes sense: Confirms one cyclic motion.
+• How it gave us info: Validates the motion and looks good for explaining dynamics to judges.
+
+
+--- 4. VARIABLE COUNTERWEIGHT REGENERATION SYSTEM — Time-Series ---
+
+(1) Cabled mass position [Height vs Time]
+• What it shows: Vertical position of the main “cabled” mass (the one we lift and drop) over the cycle.
+• Why it looks this way: Starts high, descends (generation), then may hold/dock, then ascends (consumption). So the “charge” in time is ascent and “discharge” is descent—same as others, but the key twist is that mass changes (see (3)).
+• Why that makes sense: We drop a heavy configuration to generate, then lift a lighter one to recharge, reducing the work the motor must do.
+• How it gave us info: Defines the stroke and when we’re in descent vs ascent for power and energy.
+
+(2) Cabled mass velocity [Velocity vs Time]
+• What it shows: Vertical speed of the cabled mass; negative when descending, positive when ascending.
+• Why it looks this way: Mirrors position: negative during descent, positive during ascent, with smooth acceleration/deceleration.
+• Why that makes sense: Same as other systems—velocity drives power (force × velocity).
+• How it gave us info: Used with (time-varying) mass to get mechanical power and then electrical generation and consumption.
+
+(3) Variable mass (modules on cabled mass) [Modules attached vs Time]
+• What it shows: Number of mass modules attached to the cabled mass over time (e.g. 2 during most of descent, 1 during ascent, with step changes at dock/load).
+• Why it looks this way: Step-like or staircase: more modules during descent (heavier drop, more generation), fewer during ascent (lighter lift, less consumption). Steps occur at dock and load phases.
+• Why that makes sense: This is the “variable counterweight” idea: we add mass for the drop to maximize generation and remove mass for the ascent to minimize motor work.
+• How it gave us info: Directly shows the control strategy; we use module count to get total mass (next graph) and then net force and power.
+
+(4) Total moving mass [Total mass vs Time]
+• What it shows: Total mass of the cabled system (base mass + modules) over time.
+• Why it looks this way: Follows the module count: higher when more modules are attached (descent), lower when fewer (ascent).
+• Why that makes sense: Total mass = base + n_modules × mass_per_module; it sets gravitational force and thus mechanical power.
+• How it gave us info: We multiply total mass by g and velocity to get mechanical power; different mass in descent vs ascent is why this system can be more efficient.
+
+(5) Generation: main, module, supercap [Power vs Time]
+• What it shows: Power from “Main gen” (main generator during drop), “Module gen” (e.g. from module attachment/detachment or secondary recovery), and “Supercap to grid” (supercapacitor discharge to grid or load).
+• Why it looks this way: Main gen has a peak during descent; module gen may be a smaller bump; supercap may smooth or supplement. We model these from the physics (main drop, optional module recovery, optional supercap).
+• Why that makes sense: This system can have multiple generation paths—main drop plus any recovery from modules or buffers.
+• How it gave us info: Breaks down where generated power comes from; we sum and integrate to get total generated energy.
+
+(6) Main motor (ascent) [Power vs Time]
+• What it shows: Electrical power consumed by the main motor that lifts the cabled mass during ascent.
+• Why it looks this way: Active only during ascent; shape follows (net load × velocity / efficiency). Net load is smaller because the counterweight nearly balances the ascending mass.
+• Why that makes sense: We only supply the imbalance and losses; that’s why variable counterweight can have high efficiency.
+• How it gave us info: We integrate to get consumed energy; with generated energy this gives round-trip efficiency and net energy per cycle.
+
+(7) Charge vs discharge power [Power vs Time, combined]
+• What it shows: Motor (consumption), main gen, module gen, supercap (generation), all on one plot.
+• Why it looks this way: Consumption during ascent (and maybe dock/load); generation during descent (and possibly small contributions from module/supercap at other times).
+• Why that makes sense: Full picture of power in and out.
+• How it gave us info: Visual balance and support for cumulative energy and pie chart.
+
+(8) Cumulative energy [Energy vs Time]
+• What it shows: Running totals of Consumed, Generated, and Net over the cycle.
+• Why it looks this way: Consumed ramps up during ascent (and any auxiliary phases); Generated ramps up during descent. Net = Generated − Consumed; for variable counterweight we often get net closer to zero (higher efficiency).
+• Why that makes sense: Same integration idea as all other systems.
+• How it gave us info: Final values feed into round-trip efficiency and into the comparison (bar charts, ANOVA).
+
+(9) Cycle energy split [Pie chart]
+• What it shows: “Consumed (motor)” vs “Generated (main+module+supercap)” for one cycle.
+• Why it looks this way: Two slices; in our simulation the generated slice can be close in size to consumed (high efficiency) because we optimized the variable mass strategy.
+• Why that makes sense: Shows at a glance how efficient this design is relative to the others.
+• How it gave us info: Quick visual for judges; matches the numbers we report in the comparison figure.
+
+
+--- ENERGY ANALYSIS FIGURES (all four systems) ---
+
+Each system also has a second figure “Energy Analysis” with typically:
+• One-cycle energy balance: bar chart of Consumed, Generated, Net (same totals as the end of cumulative energy).
+• Net cumulative energy: net energy over time (sometimes same as the “Net” curve in the time-series cumulative plot).
+• Round-trip efficiency: generated/consumed (or similar), possibly over time or as a single value.
+• One system-specific plot (e.g. regeneration ratio for dual-weight, chamber fill vs position for buoyancy, thrust vs position for Halbach, mass vs position for variable counterweight).
+
+For judges: “The Energy Analysis figure takes the same data as the time-series and summarizes it—total consumed, total generated, net, and round-trip efficiency—plus one plot that highlights something specific to that system (e.g. how the counterweight or water or thrust behaves).”
+
+
+================================================================================
+Use this as a reference when judges ask “What does this graph mean?” or “Why does it look like that?”
+================================================================================

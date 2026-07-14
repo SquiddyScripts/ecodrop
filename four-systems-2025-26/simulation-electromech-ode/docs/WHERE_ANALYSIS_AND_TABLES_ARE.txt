@@ -1,0 +1,72 @@
+================================================================================
+WHERE IS THE ANALYSIS? WHERE ARE THE TABLES? HOW ARE LOSSES CALCULATED?
+================================================================================
+
+RUN THIS SCRIPT:  run_tiered_gravity_analysis
+  From project root in MATLAB:  setup_path   then   run('scripts/run_tiered_gravity_analysis')
+
+--------------------------------------------------------------------------------
+1. OUTPUT FILES (created in the project  output/  folder when you run the script)
+--------------------------------------------------------------------------------
+  • output/tiered_analysis_tables.txt   → All 4 tables (summary, loss breakdown, cycle-by-cycle, cost)
+  • output/tiered_conclusion.txt        → 7-section written conclusion with numbers
+
+  If you don't see these files: run the script once. All generated files go to the  output/  folder.
+
+--------------------------------------------------------------------------------
+2. WHERE THE NUMBERS COME FROM (in run_tiered_gravity_analysis.m)
+--------------------------------------------------------------------------------
+  • Simulation (helper get_gravity_system_data, ~lines 256–294):
+    For each system and each of 10 replicates, the script computes:
+    - E_gen = electrical energy out per cycle (J)
+    - E_cons = mechanical energy in per cycle (J)
+    using prescribed motion, efficiency parameters, and friction_scale (±10%).
+
+  • Averages and SD (lines 37–51):
+    Egen = mean of E_gen across replicates
+    E_cons = mean of E_cons
+    power_eff_mean = 100 * Egen / (m*g*h)   ← Power efficiency %
+    power_eff_sd = standard deviation across replicates
+
+  • Total loss (line 66):
+    total_loss = E_cons - Egen   (Joules lost per cycle)
+
+  • Loss breakdown (lines 59–71) — HOW LOSSES ARE CALCULATED:
+    The simulation does not output rope/bearing/gear/motor separately.
+    So we take total_loss and split it using FIXED FRACTIONS per system:
+
+      total_loss = E_cons - Egen
+
+      loss_rope   = total_loss * fraction_rope
+      loss_bearing= total_loss * fraction_bearing
+      loss_gear   = total_loss * fraction_gear
+      loss_motor  = total_loss * fraction_motor
+
+    The fractions (loss_frac) are chosen by system design:
+      Dual Weight:    15% rope, 20% bearing, 25% gear, 40% motor
+      Buoyancy:       20% rope, 15% bearing, 10% gear, 55% motor
+      Halbach Array:  10% rope, 25% bearing, 30% gear, 35% motor
+      Variable CW:    10% rope, 15% bearing, 25% gear, 50% motor
+
+    So: total loss is from the simulation (E_cons - Egen). The split into rope/bearing/gear/motor is an assumed distribution for reporting, not measured separately.
+
+--------------------------------------------------------------------------------
+3. TABLES (all in tiered_analysis_tables.txt)
+--------------------------------------------------------------------------------
+  TABLE 1: Per-system summary — Mech power in (W), Elec power out (W), Power efficiency (%), RTE (%), Energy lost/cycle (J), Est. cost/kWh ($).
+  TABLE 2: Loss breakdown — Rope, Bearing, Gear, Motor (J and % of input) per system.
+  TABLE 3: Regenerative systems cycle-by-cycle — Dual Weight and Variable CW, E_in, E_out, Net per replicate.
+  TABLE 4: Cost analysis — Build factor, E_gen/cycle, kWh over life, Cost/kWh.
+
+--------------------------------------------------------------------------------
+4. CONCLUSION (tiered_conclusion.txt)
+--------------------------------------------------------------------------------
+  Section 1: Research goal
+  Section 2: Defined terms (power efficiency, RTE, successful system)
+  Section 3: Results with numbers (regen vs regen, storage vs storage, best of all four)
+  Section 4: Loss analysis summary
+  Section 5: Advantages and limitations
+  Section 6: Real-world significance
+  Section 7: Future work
+
+================================================================================

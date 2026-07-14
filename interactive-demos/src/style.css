@@ -1,0 +1,212 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: #0c0e14;
+  color: #ebebf0;
+}
+
+#app {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+#canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+#hud {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: min(380px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+#hud header {
+  padding: 4px 2px;
+}
+
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #59adff;
+  margin-bottom: 4px;
+}
+
+#hud h1 {
+  font-size: 18px;
+  line-height: 1.25;
+  font-weight: 650;
+}
+
+.panel {
+  background: rgba(12, 14, 20, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 14px;
+  backdrop-filter: blur(10px);
+}
+
+.phase-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(89, 173, 255, 0.18);
+  color: #59adff;
+  margin-bottom: 8px;
+}
+
+.phase-panel h2 {
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+
+.phase-panel p {
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(235, 235, 240, 0.82);
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.metric span {
+  font-size: 11px;
+  color: rgba(235, 235, 240, 0.55);
+}
+
+.metric strong {
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+.controls .row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+button {
+  flex: 1;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.slider-label {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+.slider-label input[type='range'] {
+  width: 100%;
+  margin-top: 6px;
+}
+
+#speed-label {
+  float: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+.legend h3 {
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.legend ol {
+  padding-left: 18px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(235, 235, 240, 0.82);
+}
+
+.legend li + li {
+  margin-top: 6px;
+}
+
+.note {
+  margin-top: 10px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: rgba(235, 235, 240, 0.5);
+}
+
+#hud.phase-lift .phase-badge {
+  background: rgba(255, 128, 77, 0.18);
+  color: #ff804d;
+}
+
+#hud.phase-water .phase-badge {
+  background: rgba(89, 173, 255, 0.18);
+  color: #59adff;
+}
+
+#hud.phase-drop .phase-badge {
+  background: rgba(102, 217, 140, 0.18);
+  color: #66d98c;
+}
+
+.load-status {
+  position: absolute;
+  bottom: 18px;
+  right: 24px;
+  font-size: 13px;
+  color: rgba(235, 235, 240, 0.7);
+  pointer-events: none;
+}
+
+@media (max-width: 720px) {
+  #hud {
+    width: min(320px, calc(100vw - 24px));
+    top: 10px;
+    left: 10px;
+  }
+}

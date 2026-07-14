@@ -1,0 +1,125 @@
+EXPLANATION OF THE 6 SCIENCE FAIR GRAPHS
+=========================================
+Why each graph was chosen, how the values were calculated, what it shows, and why it makes sense.
+
+All four systems are compared under the same conditions: 50 kg effective storage mass, 3 m height. The simulation runs each system 10 times with small random variations in efficiency parameters (±2%) to represent real-world uncertainty; we plot means (and, where relevant, error bars or standard deviation).
+
+--------------------------------------------------------------------------------
+GRAPH 1: Mechanical vs. Electrical Power Output — All 4 Systems
+--------------------------------------------------------------------------------
+
+WHAT IT SHOWS
+  For each system, two bars: average mechanical power input (blue) and average electrical power output (orange) over one full cycle, in watts (W).
+
+HOW IT WAS CALCULATED
+  • Mechanical power input is the electrical energy the system consumes (motors, pumps, auxiliaries) to run one cycle, divided by the cycle time. In the code: E_cons = Egen × (100 / eta_mean), so that round-trip efficiency eta = 100×Egen/E_cons. Then P_mech_avg = E_cons / T_cycle (watts).
+  • Electrical power output is the electrical energy generated (recovered) during the cycle, divided by the cycle time: P_elec_avg = Egen / T_cycle (watts).
+  • Cycle times T_cycle differ by system (e.g. Dual Weight ~6 s, Buoyancy ~46 s, Electromagnetic ~9.7 s, Variable Counterweight ~7.5 s), so power spreads the same energy over different durations.
+
+WHY IT MAKES SENSE
+  Systems that use less mechanical (electrical) input per second and still produce usable electrical output are doing more with less ongoing demand. Variable Counterweight has relatively low input power and good output; Buoyancy has long cycle time so average power is lower; Electromagnetic can show high input power during lift. The gap between the two bars reflects losses and auxiliary consumption.
+
+WHY WE CHOSE IT
+  Judges and reviewers want to see “how much goes in vs. how much comes out” in units they know (watts). This graph answers that directly and shows which systems have favorable power balance at a glance.
+
+--------------------------------------------------------------------------------
+GRAPH 2: Regeneration vs. Consumption — All 4 Systems
+--------------------------------------------------------------------------------
+
+WHAT IT SHOWS
+  For each system, two bars: energy consumed per cycle (red-brown) and energy regenerated per cycle (green), in kilojoules (kJ).
+
+HOW IT WAS CALCULATED
+  • Energy consumed (E_cons): total electrical energy used in one cycle (motors, pumps, auxiliaries). Computed from the simulation as the time integral of all consumption power over the cycle. We also derive it from Egen and efficiency: E_cons = Egen × (100 / eta_mean), so that eta = 100×Egen/E_cons.
+  • Energy regenerated (Egen): total electrical energy produced in one cycle (generator output). From the simulation: time integral of electrical power output during descent/generation phases. Egen is in joules; the graph shows Egen/1000 (kJ).
+
+WHY IT MAKES SENSE
+  In a storage system you “pay” with consumption (lifting, pumping, control) and “get back” regeneration (descent, generation). For a fair comparison we use the same 50 kg and 3 m for all. Systems with high regeneration relative to consumption (e.g. Variable Counterweight) are more efficient; those with big consumption bars (e.g. Buoyancy, Electromagnetic) have more losses or auxiliary load.
+
+WHY WE CHOSE IT
+  This is the energy version of “what you put in vs. what you get out.” It supports the conclusion that Variable Counterweight gives the best balance and makes the idea of “net energy” (regenerated minus consumed) easy to see before we show efficiency or net-energy graphs.
+
+--------------------------------------------------------------------------------
+GRAPH 3: Regeneration Efficiency — All 4 Systems
+--------------------------------------------------------------------------------
+
+WHAT IT SHOWS
+  One bar per system: round-trip regeneration efficiency in percent (%), with error bars showing variability across the 10 replicate runs.
+
+HOW IT WAS CALCULATED
+  • Round-trip efficiency = 100 × (Energy regenerated / Energy consumed) = 100 × Egen / E_cons. So eta_mean = 100 × Egen / E_cons (as a mean over replicates).
+  • In the simulation, for each run we integrate power to get E_gen and E_cons per cycle, then compute eta = 100×E_gen/(E_cons+ε). We take the mean (eta_mean) and standard deviation (eta_sd) across the 10 runs; the bar is eta_mean, error bars are eta_sd.
+
+WHY IT MAKES SENSE
+  Efficiency is the single number that says “for every unit of electrical energy you put in, how much do you get back?” Higher percent means less waste. Variable Counterweight comes out highest (~90%) because it minimizes net motor work (counterweight matches load); Electromagnetic is lowest because of multiple conversion steps and auxiliary power. The error bars show that the ranking is stable under small parameter changes.
+
+WHY WE CHOSE IT
+  This is the main “result” graph: it directly answers “which system is most efficient?” and supports the conclusion that Variable Counterweight is best. The error bars show we did repeated runs and that the difference between systems is not just noise.
+
+--------------------------------------------------------------------------------
+GRAPH 4: Cycle Energy Split — Regenerated vs. Losses (All 4 Systems)
+--------------------------------------------------------------------------------
+
+WHAT IT SHOWS
+  For each system, a stacked bar: green = energy regenerated (electrical output), orange-red = losses (consumed minus regenerated), both in kJ per cycle.
+
+HOW IT WAS CALCULATED
+  • Regenerated = Egen / 1000 (kJ), same as in Graph 2.
+  • Losses = (E_cons − Egen) / 1000 (kJ). So the total bar height is E_cons/1000; the green part is useful output, the rest is loss (friction, heat, auxiliary consumption that doesn’t become useful output).
+
+WHY IT MAKES SENSE
+  Every system consumes more than it regenerates (thermodynamics); the difference is loss. A system with a tall green block and a short loss block (like Variable Counterweight) is efficient; one with a big loss block (e.g. Electromagnetic, Buoyancy) has more losses or auxiliary draw. The stacked view makes “where the energy goes” obvious.
+
+WHY WE CHOSE IT
+  It explains why efficiency differs: not just “efficiency is low” but “this much is recovered, this much is lost.” That supports the conceptual explanation (counterweighting reduces net work and losses) and gives judges a clear picture of where losses occur in each design.
+
+--------------------------------------------------------------------------------
+GRAPH 5: Cost Per Kilowatt-Hour — All 4 Systems (Estimated, Amortized Over Lifecycle)
+--------------------------------------------------------------------------------
+
+WHAT IT SHOWS
+  One bar per system: estimated cost in $/kWh of delivered electrical energy over the system’s lifetime, assuming a fixed lifecycle (e.g. 10,000 cycles) and relative build costs.
+
+HOW IT WAS CALCULATED
+  • Total electrical energy delivered over lifecycle = Egen × N_cycles_life (joules). Convert to kWh: kWh_per_life = (Egen × N_cycles_life) / 3.6e6.
+  • Estimated total cost = base_build × build_factor, where build_factor is a relative complexity/cost factor per system (e.g. Dual Weight 1.0, Buoyancy 1.2, Electromagnetic 1.8, Variable Counterweight 1.4).
+  • Cost per kWh = (base_build × build_factor) / kWh_per_life. So cost_per_kWh = (base_build × build_factor) / max(kWh_per_life, 0.01), in $/kWh.
+
+WHY IT MAKES SENSE
+  A system that is efficient (high Egen per cycle) delivers more kWh over life, so cost per kWh goes down. A system with higher build cost (higher build_factor) has higher cost per kWh unless it is much more efficient. So Variable Counterweight can still be attractive if its efficiency gain outweighs a somewhat higher build cost. The graph is labeled “Estimated” because build_factor and base_build are assumptions, not from a detailed cost model.
+
+WHY WE CHOSE IT
+  Judges care about “is this practical?” Cost per kWh combines efficiency and (rough) cost into one feasibility metric. It shows we thought about not just “which is most efficient?” but “which might be most economical per unit of energy delivered?”
+
+--------------------------------------------------------------------------------
+GRAPH 6: Lifecycle Energy Performance — Cumulative Net Energy (All 4 Systems)
+--------------------------------------------------------------------------------
+
+WHAT IT SHOWS
+  Four lines, one per system: cumulative net energy (regenerated minus consumed) over many cycles (e.g. 1 to 1000), in kJ. Net is negative (we consume more than we regenerate per cycle), so the lines go downward; the “best” system has the least negative slope.
+
+HOW IT WAS CALCULATED
+  • Net energy per cycle for each system: net_mean = Egen − E_cons (joules), from the simulation (mean over 10 runs).
+  • For cycle count N = 1, 2, …, 1000: cumulative_net(N) = N × net_mean (joules). The graph plots cumulative_net/1000 (kJ) vs N.
+  • So each line is straight: slope = net_mean (kJ per cycle). The less negative net_mean, the flatter the line and the “better” the system over time.
+
+WHY IT MAKES SENSE
+  Over many cycles, total net energy is just N times the per-cycle net. So the system with the least negative net per cycle (Variable Counterweight) accumulates the smallest total “debt” and is the best long-term performer. The graph shows that the ranking (Variable CW best, then Dual Weight, Buoyancy, Electromagnetic worst) holds over the whole lifecycle.
+
+WHY WE CHOSE IT
+  It answers “what happens over many charge–discharge cycles?” and shows that the best system in one cycle is also the best over 1000 cycles. That supports both the efficiency conclusion and the idea that the comparison is relevant for long-term use.
+
+--------------------------------------------------------------------------------
+SUMMARY TABLE
+--------------------------------------------------------------------------------
+
+| Graph | Main idea                         | Key formula / quantity              | Why it supports the conclusion                    |
+|-------|-----------------------------------|-------------------------------------|---------------------------------------------------|
+| 1     | Power in vs. power out            | P_mech_avg = E_cons/T_cycle, P_elec_avg = Egen/T_cycle | Shows which systems have better power balance     |
+| 2     | Energy in vs. energy out          | E_cons, Egen (kJ per cycle)         | Shows “what you put in vs. get out” per cycle     |
+| 3     | Round-trip efficiency             | eta = 100×Egen/E_cons (%)          | Single clearest “winner”: Variable CW highest      |
+| 4     | Where energy goes (regen vs. loss)| Regen = Egen, Losses = E_cons−Egen | Explains why some systems have lower efficiency   |
+| 5     | Feasibility ($/kWh)               | (build_cost) / (Egen×N_cycles/3.6e6) | Links efficiency to practical cost per kWh        |
+| 6     | Long-term net energy              | Cumulative net = N × net_mean      | Shows best system stays best over many cycles     |
+
+All graphs use the same underlying simulation outputs (Egen, E_cons, eta_mean, net_mean, T_cycle) so the story is consistent: Variable Counterweight is the most efficient and has the best net energy balance; the other graphs explain and support that result in different ways (power, energy split, cost, lifecycle).

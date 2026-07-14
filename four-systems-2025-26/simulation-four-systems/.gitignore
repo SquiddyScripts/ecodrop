@@ -1,0 +1,11 @@
+# Python (if any scripts added later)
+__pycache__/
+
+# IDE / OS
+.cursor/
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

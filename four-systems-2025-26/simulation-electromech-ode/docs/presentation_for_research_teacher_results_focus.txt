@@ -1,0 +1,188 @@
+================================================================================
+PRESENTATION FOR STRICT RESEARCH TEACHER — RESULTS FIRST
+Order: Simulation → Graphs → Conclusions → Results. Methods only if asked.
+================================================================================
+
+
+---- 1. SIMULATION ----
+
+What the simulation tells us
+• The simulation tells us how much electrical energy each system would put in and get out over one full cycle, under the same height and mass and the same type of motion. So we get a fair comparison: same "script," different designs.
+• It tells us that the four designs do not perform the same: we get different round-trip efficiencies and different net energies. The simulation produced the numbers we then tested with ANOVA and reported in the conclusion.
+• It tells us that all systems lose energy on balance (negative net energy per cycle), which is what we expect when there are losses—so the results are thermodynamically plausible.
+
+Why we use a set curve instead of F = ma (prescribed motion)
+• If we solved F = ma for each system, each design would have different equations and different motion—different speeds at different times. Then we couldn't compare "at the same point" because the four systems wouldn't be at the same point at the same time; they'd each have their own trajectory.
+• So instead we fix the motion first: we choose one curve for "how the thing moves" over the cycle—e.g. how fast it goes down, how fast it goes up, and for how long. That's the same for all four in spirit (same height, same mass, same kind of smooth motion). So at every time point we're comparing the same input: "here is the position and speed; now how much power does each design put in or get out?"
+• That way we compare at every point: same motion in, different power out (because each design converts that motion to electricity differently—different motors, pumps, counterweights, etc.). So the only thing that changes between systems is the design, not the motion. That's why we use a set curve: so the comparison is fair and we can say "under the same motion, this design gives this efficiency and net energy."
+
+
+---- 2. GRAPHS ----
+
+Overall: what each dashboard tells us (brief)
+• Buoyancy dashboard: Shows one full cycle—lift, water phase, drop. It tells us when we're putting power in (motor + pump) vs when we're getting it back (generator on drop), and how the water levels and cumulative energy evolve. So we see why this system has the efficiency it does: long lift and pump cost, then one drop phase for payback.
+• Dual-weight dashboard: Shows cab and counterweight moving in opposite directions over one cycle. It tells us when we're generating (descent) vs consuming (ascent) and how mechanical power becomes electrical. So we see the elevator-style balance and where the losses are.
+• Electromagnetic dashboard: Shows the weight moving up (lift), hold, then down (drop) with linear motors and hoist. It tells us consumption during lift and hold and regeneration during drop. So we see the cost of the linear motors and hoist and why this system ends up with lower efficiency in our comparison.
+• Variable counterweight dashboard: Shows the mass going down (heavy), then up (lighter) with modules changing over the cycle. It tells us how much we generate when heavy and how little we consume when lifting light, plus the cumulative energy building to a net closer to zero. So we see why this design gets the best efficiency in our comparison.
+
+What the comparison figure (panel) tells us
+This is the figure that brings all four systems together (bar charts + ANOVA + conclusion panel).
+• Panel A — Round-trip efficiency bar chart: Average efficiency per system and spread (error bars); which system recovers the most per unit put in. Variable counterweight highest; Electromagnetic lowest.
+• Panel B — Net energy per cycle bar chart: How much each system gets out minus puts in per cycle (all negative); which loses the least. Variable counterweight best.
+• Panel C — ANOVA table: System type significantly affects both metrics (small p); effect size meaningful. Differences are not just noise.
+• Panel D — Conclusion panel: Best system and full ranking in one place.
+
+
+---- 3. CONCLUSIONS ----
+
+• Main finding: Under the conditions we used (3 m height, 50 kg effective mass), the Variable counterweight system performed best: highest round-trip efficiency (about 90%) and the best net energy recovery. So among these four designs, that one gives back the most electricity per unit we put in and loses the least per cycle.
+
+• Ranking: The systems are ordered Variable counterweight > Dual-weight elevator > Buoyancy > Electromagnetic (Halbach). So the conclusion tells us that system type clearly affects performance—it’s not a tie, and the ranking is consistent.
+
+• Statistical support: The tests tell us the differences between the four systems are unlikely to be due to chance (p < 0.001 for both efficiency and net energy). Effect size (eta-squared ~0.33) tells us that which system you use explains a substantial share of the variation in the results. So we can say the ranking is statistically meaningful.
+
+• Recommendation: For maximum round-trip efficiency and best net recovery under these test conditions, the Variable counterweight is the preferred option among the four. The conclusion also says that in practice you’d still consider complexity, cost, and scalability.
+
+• Limitations: The conclusion states that these are simplified models with parameter uncertainty, and that real prototypes or higher-fidelity simulation would strengthen the conclusions. So we’re not overclaiming—we’re saying what the comparison shows under these assumptions.
+
+(Optional extra detail; main flow continues at section 4. Results.)
+
+• The simulation tells us how much electrical energy each system would put in and get out over one full cycle, under the same height and mass and the same type of motion. So we get a fair comparison: same “script,” different designs.
+
+• It tells us that the four designs do not perform the same: we get different round-trip efficiencies and different net energies. So the simulation is what produced the numbers we then tested with ANOVA and reported in the conclusion.
+
+• It tells us that all systems lose energy on balance (negative net energy per cycle), which is what we expect when there are losses—so the results are thermodynamically plausible.
+
+
+
+This is the figure that brings all four systems together (bar charts + ANOVA + conclusion panel).
+
+• Panel A — Round-trip efficiency bar chart: This tells us the average efficiency for each system and the spread across runs (error bars). So we can see at a glance which system recovers the most electricity per unit put in and how much uncertainty there is. Variable counterweight is highest; Electromagnetic is lowest.
+
+• Panel B — Net energy per cycle bar chart: This tells us how much more (or less) each system gets out than it puts in over one cycle. All are negative (net loss). The chart tells us which system loses the least in absolute terms and in relation to what it generates—again Variable counterweight comes out best.
+
+• Panel C — ANOVA table: This tells us that system type significantly affects both efficiency and net energy (small p-values), and that the effect size (eta-squared) is meaningful. So the figure tells us the differences we see are not just noise.
+
+• Panel D — Conclusion panel: This tells us the best system for efficiency and for net recovery and the full ranking. It’s the takeaway in one place: what to report and how the systems compare.
+
+
+---- 4. RESULTS (bottom line) ----
+
+• Best system: Variable counterweight (highest round-trip efficiency, ~90%; best net recovery).
+• Ranking: Variable counterweight > Dual-weight elevator > Buoyancy > Electromagnetic.
+• Statistics: p < 0.001 for both efficiency and net energy; eta-squared ~0.33. Differences are statistically meaningful; system type explains a substantial share of the variation.
+• Recommendation: For these test conditions (3 m, 50 kg), Variable counterweight is preferred; in practice also consider complexity, cost, scalability.
+• Limitations: Simplified models with parameter uncertainty; prototypes or higher-fidelity simulation would strengthen conclusions.
+
+
+---- OPTIONAL: WHAT EACH DASHBOARD PLOT TELLS US (if asked about a specific plot) ----
+
+
+--- BUOYANCY GRAVITY BATTERY ---
+
+• Buoyant weight height: Tells us how high the weight is over the cycle and when we’re in the lift vs drop part—so we see the stroke and timing of the cycle.
+
+• Weight velocity: Tells us how fast and in which direction the weight moves at each time—so we see when we’re charging (up) vs discharging (down) and how the speed varies.
+
+• Water levels (chamber and reservoir): Tells us how the water is moved between chamber and reservoir over time—so we see the hydraulic mechanism that makes the buoyancy system work and when the pump is active.
+
+• Motor and pump (consumption): Tells us how much electricity we’re using to lift the weight and run the pump—so we see the “cost” of the charge phase.
+
+• Generator output (drop phase): Tells us how much electricity we get back when the weight drops—so we see the “payback” of the discharge phase.
+
+• Charge vs discharge power: Tells us when we’re putting power in vs taking it out and how big those rates are—so we see the balance of the cycle in one view.
+
+• Cumulative energy: Tells us how much we’ve put in and how much we’ve got out by any time in the cycle—so we see total consumed, total generated, and net building up over time. The final values are what we use for efficiency and net energy.
+
+• Cycle energy split (pie): Tells us in one picture how much of the cycle’s energy was consumed vs generated—so we see at a glance whether this system is close to break-even or losing a lot.
+
+• Weight phase portrait (h vs v): Tells us how velocity and height relate over the cycle (the loop)—so we see that the motion is one consistent cycle with no impossible behavior.
+
+
+--- DUAL WEIGHT REGENERATION SYSTEM ---
+
+• Cab and counterweight height: Tells us that the cab and counterweight move in opposite directions—so we see the elevator-style kinematics and the stroke.
+
+• Cab and counterweight velocity: Tells us their speeds match in magnitude but are opposite in sign—so we see they’re coupled and when we’re in descent vs ascent.
+
+• Mechanical and electrical power: Tells us how much power is at the drum (mechanical) and after conversion (electrical)—so we see when we’re generating vs consuming and how much is lost in conversion.
+
+• Regeneration vs consumption: Tells us when we get energy back (descent) vs when we put it in (ascent) and the relative size of those phases—so we see the split of the cycle.
+
+• Regeneration efficiency (descent phase): Tells us how well we convert motion to electricity during the drop—so we see that we don’t get 100% back even during generation.
+
+• Motor / generator current: Tells us when the machine is drawing current (motoring) vs supplying it (generating)—so we see the same device doing both jobs.
+
+• Cumulative energy: Tells us total generated, consumed, and net over the cycle—so we see the numbers that feed into round-trip efficiency and net energy.
+
+• Cycle energy split (pie): Tells us the ratio of regenerated to consumed in one cycle—so we see this system’s efficiency at a glance.
+
+• Cab phase portrait (h vs v): Tells us the cab’s trajectory in height–velocity space—so we see one clean cycle and consistent motion.
+
+
+--- ELECTROMAGNETIC (HALBACH) GRAVITY STORAGE ---
+
+• Weight position (linear travel): Tells us how the weight moves along the track over time—so we see the stroke and when we’re in lift vs hold vs drop.
+
+• Weight velocity: Tells us speed and direction over time—so we see when we’re charging vs discharging.
+
+• Linear motor thrust: Tells us how much force the linear motors apply over time—so we see when we’re lifting (positive thrust) vs when the system is generating during drop.
+
+• Consumption (linear motors and hoist): Tells us how much electricity we use for the linear motors and the hoist during lift and hold—so we see the cost of the charge phase.
+
+• Regeneration (drop phase): Tells us how much electricity we get back when the weight drops—so we see the payback of the discharge phase.
+
+• Phase current: Tells us the electrical current in one phase of the motor/generator—so we see that this system has a real electrical structure (e.g. multi-phase).
+
+• Charge vs discharge power: Tells us when we’re consuming vs generating and the relative sizes—so we see the balance of the cycle.
+
+• Cycle energy split (pie): Tells us consumed vs generated for one cycle—so we see this system’s efficiency at a glance (and that it’s lower than the others in our comparison).
+
+• Phase portrait (position vs velocity): Tells us the weight’s trajectory in state space—so we see one consistent cycle.
+
+
+--- VARIABLE COUNTERWEIGHT REGENERATION SYSTEM ---
+
+• Cabled mass position: Tells us where the main mass is over the cycle—so we see when we’re in descent (generation) vs ascent (consumption) and any dock/load phases.
+
+• Cabled mass velocity: Tells us how fast and which way the mass moves—so we see the timing of generation vs consumption.
+
+• Variable mass (modules attached): Tells us how many modules are on the mass at each time—so we see the control strategy: heavier during drop (more generation), lighter during ascent (less to lift). This is the core of why this system can be more efficient.
+
+• Total moving mass: Tells us the actual mass over time—so we see that mass is higher when we’re generating and lower when we’re consuming, which drives the efficiency advantage.
+
+• Generation (main, module, supercap): Tells us where the generated power comes from—main drop, module recovery, supercap—so we see the different sources of “get back.”
+
+• Main motor (ascent): Tells us how much electricity we use to lift the (lighter) mass during ascent—so we see that consumption is reduced because we only lift the lighter configuration.
+
+• Charge vs discharge power: Tells us when we’re putting power in vs getting it out from each source—so we see the full balance of the cycle.
+
+• Cumulative energy: Tells us total consumed, generated, and net over the cycle—so we see that this system ends up with net closer to zero (higher efficiency), which matches the comparison result.
+
+• Cycle energy split (pie): Tells us consumed vs generated for one cycle—so we see at a glance that this system gets back a lot relative to what it puts in (the best in our comparison).
+
+
+---- 5. ENERGY ANALYSIS FIGURES (SECOND FIGURE PER SYSTEM) ----
+
+• One-cycle energy balance (bar chart): Tells us the total consumed, total generated, and net for one cycle—same numbers as the end of the cumulative energy curve, in bar form for quick reading.
+
+• Net cumulative energy (or similar): Tells us how net energy evolves over the cycle—so we see when we’re ahead or behind and where we end up.
+
+• Round-trip efficiency: Tells us the ratio generated/consumed for that system—so we see the single number we then compare across systems.
+
+• System-specific plot (e.g. regeneration ratio, chamber fill vs position, thrust vs position, mass vs position): Tells us something specific to that design—e.g. how the counterweight or water or thrust or mass behaves—so we can explain why that system performs the way it does.
+
+
+---- 6. IF ASKED ABOUT METHODS (SHORT ANSWERS) ----
+
+• How did you simulate? We prescribed the motion for each system (same height and mass, fixed phase lengths) and computed power in and out, then integrated to get energy. So we get round-trip efficiency and net energy per cycle. We ran each system 10 times with slightly different efficiency parameters to get replicates.
+
+• How did you compare? We used one-way ANOVA on efficiency and on net energy to test whether the four systems differ; we reported F, p-value, and eta-squared. The bar charts show mean and standard deviation per system.
+
+• Why prescribed motion? So all four systems see the same type of cycle and we only change the design. That keeps the comparison fair.
+
+================================================================================
+Use this when presenting: order is Simulation → Graphs → Conclusions → Results.
+Lead with what the simulation and graphs tell us (dashboard summaries + comparison
+panel); then conclusions and results. Go to methods or per-plot detail only if asked.
+================================================================================

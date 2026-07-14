@@ -1,0 +1,158 @@
+================================================================================
+EXPLAINING THE GAP: CLASS vs PROJECT — SO YOU CAN TALK TO YOUR TEACHER
+================================================================================
+
+You're worried because what we do in the project feels way more advanced than
+what you're doing in class. This sheet helps you connect the two so you can
+explain it honestly and still sound like you understand it.
+
+
+---- THE HONEST FRAME ----
+
+You can say something like:
+
+  "In class we're doing basics—arrays, loops, if statements, simple plots.
+  The project uses those same building blocks, but they're combined and
+  applied to a real problem: simulating four gravity storage systems and
+  comparing them with statistics. So it's not different kinds of MATLAB—it's
+  the same ideas used more and in sequence. I had to look up some functions
+  (like trapz and how to do logical indexing) and piece it together, but
+  the core is still variables, arrays, for loops, and plotting."
+
+That way you're not pretending you invented everything, and you're not saying
+the project is "easy"—you're saying it's built from stuff you're learning.
+
+
+---- WHAT FROM CLASS SHOWS UP IN THE PROJECT ----
+
+• Variables and assignment (x = 5, eta_gen = 0.72 + 0.02*randn)
+  → We use this everywhere. Same as in class.
+
+• Arrays / vectors (lists of numbers)
+  → t2 = linspace(0, 6, 250) is just "a list of 250 times." P_mech is "a list
+  of power values at each time." So we're still just storing numbers in arrays.
+
+• for loops (for r = 1:10 ... end)
+  → We run the same calculation 10 times (the replicates). Same idea as
+  "loop and do something each time"—we just do more inside the loop.
+
+• if and comparisons (if p_eta < 0.001, if t2 <= T1_d)
+  → We use if to choose what to do (e.g. format the p-value). And things
+  like t2 <= T1_d give us true/false for each time—that's just comparison
+  applied to a whole vector.
+
+• Functions (function results = main_simulation(params))
+  → We have a main function that takes inputs and returns outputs. Same idea
+  as writing a function in class; ours just has more steps inside.
+
+• Plotting (plot, subplot, xlabel, bar)
+  → We use plot(x, y), subplot to put several graphs in one figure, bar for
+  bar charts. Same commands you learn; we just call them more times and set
+  colors/labels.
+
+• Getting one number from a list (mean, sum, max)
+  → mean(eta_all, 2) is "average of each row." sum(...) and max(...) we use
+  for ANOVA and to pick the best system. Still "apply a function to an array."
+
+So a lot of the project is "same concepts, bigger and chained together."
+When your teacher asks "What did you use?", you can say: "Mostly what we
+learned—vectors, for loops, if, and plot. Plus a few things I looked up
+for this problem, like trapz for integrating power to get energy, and
+logical indexing to pick which time points are in which phase."
+
+
+---- WHAT *LOOKS* ADVANCED (AND HOW TO DESCRIBE IT SIMPLY) ----
+
+• Logical indexing (v_cab(ix1) = ...)
+  → "We have a true/false vector that says 'which times are in phase 1.'
+  We use that as the index so we only fill in velocity for those times.
+  It's like an if, but for a whole vector at once."
+
+• trapz(t, P)
+  → "We have power at many time points. Energy is area under the power curve.
+  trapz is MATLAB's way to approximate that area (trapezoidal rule). So we
+  don't do the integral by hand—we give it the time and power vectors and
+  it gives us one number, total energy."
+
+• Element-wise .* and .^
+  → "We need to multiply two vectors point by point, not matrix multiply.
+  So we use the dot: .* and .^ so every element gets the operation. It's
+  still just multiply and power—just per element."
+
+• Anonymous function @(t, state) ...
+  → "The ODE solver wants a function that takes (t, state). We already have
+  system_ode_wrapper(t, state, params) but params is fixed. So we make a
+  small wrapper with @ that 'locks in' params. It's so we can pass one
+  function into ode45."
+
+• ANOVA "by hand" (SSb, SSw, F)
+  → "We didn't use a stats toolbox function. We used the formula from class:
+  sum of squares between groups, sum of squares within, then F = MS_between
+  / MS_within. So it's just sum, subtraction, and division on the arrays
+  of efficiency and net energy."
+
+• Cell arrays (energy_history{i})
+  → "We need to store a whole structure for each time step, and the number
+  of steps can change. So we use a cell array—each slot can hold something
+  different. We access slot i with curly braces: energy_history{i}."
+
+You don't have to re-derive these. You can say: "I looked up how to do
+logical indexing / trapz / anonymous functions for this project and then
+used them in the script."
+
+
+---- IF THE TEACHER SAYS "THIS SOUNDS TOO ADVANCED FOR THE CLASS" ----
+
+You can answer:
+
+  "I get that. The project idea came from wanting to compare the four
+  systems with real numbers and statistics. So I had to use some things we
+  haven't covered yet—like integrating a vector with trapz and doing the
+  ANOVA step by step. I learned those for this project and tried to keep
+  the rest to what we've seen: loops, arrays, if, and plots. So the level
+  is a mix—basics from class plus a few extra functions and formulas I
+  looked up and applied."
+
+That's honest: you're not saying you knew it all before, and you're
+showing that you know which parts are "from class" and which are "I
+looked this up for the project."
+
+
+---- ONE SENTENCE PER TOPIC (FOR QUICK ANSWERS) ----
+
+• "How did you get energy from power?"
+  → "We integrated power over time with trapz—so we gave it the time vector
+  and the power vector and it gave us the total energy."
+
+• "What's the loop for?"
+  → "We run each system 10 times with slightly different efficiency numbers
+  so we get 10 replicates per system for the mean, standard deviation, and
+  ANOVA."
+
+• "What's logical indexing?"
+  → "It's when we use a true/false vector as the index—so we only assign
+  or use values where the condition is true. We use it to say 'during this
+  phase, velocity is this formula.'"
+
+• "How did you do the ANOVA?"
+  → "We computed sum of squares between groups and within groups from the
+  formula, then F = MS_between / MS_within. So it's the same ANOVA we'd do
+  on paper, but the numbers are in arrays and we use sum and mean."
+
+• "Why does the code look so long?"
+  → "We have four systems and each one has its own time vector, phases,
+  velocity formula, and power. So it's a lot of the same kind of steps
+  repeated with different names (t2, t3, t4, t5, etc.). The structure is
+  the same; we just do it four times."
+
+
+---- BOTTOM LINE ----
+
+The project is not "different MATLAB"—it's more of the same building
+blocks (variables, arrays, loops, conditionals, functions, plotting)
+plus a few extra tools (trapz, logical indexing, maybe ode45) that you
+looked up to solve this specific problem. You can say that clearly to
+your teacher and still show that you understand what the code is doing
+and how the calculations work.
+
+================================================================================

@@ -1,0 +1,5 @@
+System,PE_input_J,E_out_J,Total_loss_J,Rope_J,Bearing_J,Gearbox_J,Motor_J,System_specific_J,RTE_pct
+Variable CW,1471.5,1133.06,338.45,20.31,3.38,47.38,60.92,206.45,77.0
+Dual Weight,1471.5,882.90,588.60,70.63,5.89,129.49,153.04,229.55,60.0
+Buoyancy,1471.5,581.24,890.26,26.71,8.90,44.51,62.32,747.82,39.5
+Halbach Array,1471.5,397.31,1074.20,32.23,10.74,53.71,85.94,891.58,27.0

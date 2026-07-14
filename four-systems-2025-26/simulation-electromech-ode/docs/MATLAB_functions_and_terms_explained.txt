@@ -1,0 +1,285 @@
+================================================================================
+MATLAB FUNCTIONS & TERMS — BEGINNER'S GUIDE
+(Used in this gravity storage simulation project)
+================================================================================
+
+This guide explains MATLAB-specific functions and syntax used in the project,
+assuming you're new to MATLAB. Terms are grouped by topic.
+
+
+---- 1. SCRIPTS, FUNCTIONS, AND FILES ----
+
+• function ... end
+  A block that defines a reusable routine. Example: "function results = main_simulation(params)" means: the function is named main_simulation, it takes one input (params) and returns one output (results). The function body ends with "end". You can have multiple outputs: [a, b] = myfun(x).
+
+• %
+  Single-line comment. Everything after % on that line is ignored by MATLAB. Use it to document what the code does.
+
+• %%
+  Section comment. In the Editor, "Run Section" runs from one %% to the next. Also used to organize long scripts (e.g. "%% Setup ODE Solver").
+
+• .m file
+  A MATLAB file containing script or function code. Scripts run line-by-line; functions are called by name (e.g. main_simulation(params)).
+
+• nargin
+  Number of input arguments actually passed to the function. Example: "if nargin < 1" means "if the function was called with no inputs," so we set a default (e.g. params = system_parameters()).
+
+• nargout
+  Number of output arguments the caller requested. Used when a function can return different things (e.g. "if nargout > 1" then compute and return extra outputs).
+
+
+---- 2. VARIABLES, ARRAYS, AND INDEXING ----
+
+• = (assignment)
+  Puts the value on the right into the variable on the left. Example: x = 5; A = [1 2 3];
+
+• Arrays and matrices
+  MATLAB works with vectors and matrices. [1 2 3] is a row vector; [1; 2; 3] is a column vector. Spaces or commas separate columns; semicolons separate rows. Example: state0 = [theta_initial; omega_initial; omega_motor_initial];
+
+• Indexing: ( ) and start-at-1
+  MATLAB indices start at 1 (not 0). A(1) is the first element of A. A(2,3) is row 2, column 3. A(end) is the last element; A(i,:) is "row i, all columns"; A(:,j) is "all rows, column j."
+
+• Colon :
+  Creates ranges or "all" indices. 1:5 is [1 2 3 4 5]. 1:2:10 is [1 3 5 7 9]. A(:,2) means "all rows, column 2."
+
+• size(A)
+  Returns the dimensions of A. size(A,1) is the number of rows; size(A,2) is the number of columns.
+
+• length(v)
+  For a vector v, the number of elements. For a matrix, the larger of row/column count.
+
+• numel(A)
+  Total number of elements in A (rows × columns for a matrix).
+
+• Transpose '
+  A' flips rows and columns. For real numbers, state(i,:)' turns row i into a column vector (needed for some function calls).
+
+
+---- 3. CREATING AND FILLING ARRAYS ----
+
+• zeros(m, n)
+  Creates an m×n matrix of zeros. zeros(size(t)) creates a vector of zeros with the same length as t. Used to preallocate before filling in a loop.
+
+• ones(m, n)
+  Same but with ones. 2*ones(size(t5)) creates a vector of 2’s the same length as t5.
+
+• linspace(a, b, n)
+  Creates n points evenly spaced from a to b. Example: linspace(0, 10, 250) gives 250 times from 0 to 10. Very common for time vectors.
+
+• randn
+  One random number from a standard normal (Gaussian) distribution. Used for adding small random variation (e.g. eta_gen = 0.72 + 0.02*randn).
+
+• rng(42)
+  "Seed" the random number generator so that randn (and rand) give the same sequence every run. 42 is arbitrary; same seed → reproducible "random" replicates.
+
+
+---- 4. ELEMENT-WISE VS MATRIX OPERATIONS ----
+
+• .*  ./  .^
+  Element-wise multiply, divide, power. If A and B are same size, A.*B multiplies corresponding elements; A*B would be matrix multiplication. Example: 4*tau.*(1-tau) does 4*τ*(1−τ) for each element of tau.
+
+• .* and ./
+  Same idea: A./B divides each element of A by the corresponding element of B. 100./eta_all(s,:) divides 100 by each efficiency in row s.
+
+
+---- 5. LOGICAL (TRUE/FALSE) AND INDEXING ----
+
+• Comparisons: <  >  <=  >=  ==  ~=
+  Produce logical (true/false) arrays. Example: ix1 = t2 <= T1_d gives a logical vector: true where t2 ≤ T1_d, false elsewhere.
+
+• &  |  ~
+  And, Or, Not for logicals. Example: ix_d = t3 > T_lift+T_water means "true after the water phase." Combined: ix_des5 & t5 >= 0.6*T_des5.
+
+• Logical indexing
+  Using a logical vector as an index picks only the elements where it’s true. Example: v_cab(ix1) = ... fills only the elements of v_cab where ix1 is true (e.g. during phase 1). So we don’t need to loop over time steps for each phase.
+
+• find(condition)
+  Returns the indices where condition is true. find(ix_des5 & t5 >= 0.6*T_des5, 1) returns the first index where that’s true. Used to locate a specific time or event.
+
+
+---- 6. COMMON MATH AND STATS FUNCTIONS ----
+
+• max(A), min(A)
+  Maximum or minimum of array A. max(A, 0) keeps A but replaces negative values with 0. min(90, value) caps value at 90.
+
+• max(a, b), min(a, b)
+  With two arguments: element-wise max or min. min(max(tau_d,0), 1) clamps tau_d between 0 and 1.
+
+• sum(A)
+  Sum of all elements of A. sum((grp_means - grand).^2) is used in ANOVA (sum of squared differences).
+
+• mean(A, dim), std(A, flag, dim)
+  Average and standard deviation. mean(eta_all, 2) is the mean along dimension 2 (each row → one mean per system). std(eta_all, 0, 2) is standard deviation along rows (0 means divide by N−1).
+
+• prod(A)
+  Product of elements. prod(params.gearbox.ratios) multiplies all gearbox ratios together.
+
+• trapz(x, y)
+  Trapezoidal numerical integration: approximates the integral of y with respect to x. trapz(t2, P_elec2) approximates ∫ P_elec2 dt. Used to get energy from power vs time.
+
+• cumtrapz(x, y)
+  Cumulative trapezoidal integration: gives the running integral at each point. Used for "cumulative energy" curves (energy from start up to time t).
+
+• exp, sin, pi
+  Exponential, sine, and the number π. Used in formulas (e.g. velocity profiles, pump power).
+
+
+---- 7. STRUCTURES (PARAMS, RESULTS) ----
+
+• struct
+  A container that holds named "fields." Example: params.physical.initial_height means "the structure params has a field physical, and that has a field initial_height." So we can group related parameters (physical, simulation, motor, etc.).
+
+• params.physical.initial_height
+  Dot notation: access or set a field. Reading: h0 = params.physical.initial_height; writing: params.simulation.initial_conditions = state0;
+
+• results = struct();
+  Creates an empty structure. Then we add fields: results.time = t; results.state = state; etc. So "results" holds all outputs of the simulation in one variable.
+
+• isfield(s, 'name')
+  True if the structure s has a field named 'name'. Used to check before accessing (e.g. if isfield(stage, 'P_loss')).
+
+
+---- 8. CELL ARRAYS ----
+
+• cell(n, 1)  or  {}
+  A "cell array" can hold different types or sizes in each slot. energy_history = cell(n_steps, 1) creates n_steps empty cells. Used when each time step has a different-sized or optional result (e.g. component_outputs).
+
+• energy_history{i}
+  Curly braces: access the contents of cell i. So energy_history{i} might be a structure for time step i. We use { } for cells and ( ) for normal arrays.
+
+• ~isempty(energy_history{i})
+  Check that the cell is not empty before using it. Empty cells are used as placeholders when we don’t have data for that step.
+
+
+---- 9. ANONYMOUS FUNCTIONS AND HANDLES ----
+
+• @(t, state) system_ode_wrapper(t, state, params)
+  Anonymous function: a one-line function. Here it takes (t, state) and calls system_ode_wrapper with those plus params. The ODE solver expects a function of (t, state), so we "wrap" our function to fix params.
+
+• @ode45  or  solver = @ode45
+  Function handle: a variable that refers to a function. Later we call solver(ode_wrapper, t_span, state0, options) so we can switch between ode45, ode15s, etc. by changing which function is in solver.
+
+
+---- 10. ODE SOLVER (MAIN_SIMULATION) ----
+
+• ode45, ode15s, ode23s
+  Built-in ODE solvers. They integrate differential equations: given initial state and derivative function, they step forward in time. ode45 is general-purpose; ode15s/ode23s are for "stiff" problems.
+
+• odeset('RelTol', ..., 'AbsTol', ..., 'MaxStep', ..., 'Events', ...)
+  Creates an options structure for the ODE solver: relative and absolute error tolerance, maximum step size, and an "events" function (e.g. stop when mass reaches bottom).
+
+• [t, state] = solver(ode_wrapper, t_span, state0, options)
+  Runs the solver. Returns t (time vector) and state (matrix: each row is the state at one time). state(i,:) is the state at time t(i).
+
+
+---- 11. OUTPUTS AND IGNORED ARGUMENTS ----
+
+• [~, comp_out] = system_ode(...)
+  Tilde ~ means "ignore this output." We only need the second output (comp_out), so we don’t assign the first to a variable.
+
+• [~, best_eta_idx] = max(eta_mean)
+  max returns (value, index). We only care which system is best (the index), so we ignore the value with ~.
+
+
+---- 12. PLOTTING ----
+
+• figure('Name', '...', 'Position', [...], 'Color', BG)
+  Creates a new figure window. Name appears in the title bar; Position is [left, bottom, width, height] in pixels; Color sets background.
+
+• subplot(m, n, k)
+  Splits the figure into an m×n grid and selects the k-th panel (counted left-to-right, top-to-bottom). Example: subplot(2, 2, 1) is top-left of a 2×2 layout.
+
+• plot(x, y, '-', 'Color', C, 'LineWidth', 2)
+  Plots y vs x. '-' is line style; Color and LineWidth set appearance.
+
+• hold on  /  hold off
+  hold on keeps existing curves when you plot more; hold off goes back to replacing. Used to overlay several lines on one axes.
+
+• xlabel, ylabel, title
+  Add axis labels and title to the current axes.
+
+• set(gca, 'Color', BG, 'XColor', FG, ...)
+  gca = "current axes." set changes properties (background color, axis color, etc.). Used for dark-theme styling.
+
+• bar(x, y, 'FaceColor', 'flat')
+  Bar chart. Then b.CData(i,:) = C(i,:) sets the color of bar i (C is an array of RGB triplets).
+
+• errorbar(x, y, err, 'r', ...)
+  Plots y with vertical error bars (e.g. standard deviation). 'r' is red.
+
+• text(x, y, 'string')
+  Puts text at position (x, y) on the current axes. Used for value labels on bars.
+
+• sgtitle(fig, 'Title')
+  Puts a title above all subplots for that figure.
+
+
+---- 13. STRINGS AND PRINTING ----
+
+• sprintf('%.1f%%', value)
+  Builds a string without printing. '%.1f' means one decimal place; %% is a literal percent sign. Example: sprintf('%.1f%%', eta_mean(i)) → "89.7%".
+
+• strjoin(cell_array, '\n')
+  Joins a cell array of strings with newline '\n' between them. Used to build a long paragraph from several lines.
+
+• fprintf('text %.2f more\n', x)
+  Prints to the Command Window. %.2f prints x with two decimals; \n is newline. fprintf(fid, ...) prints to the open file (fid) instead.
+
+
+---- 14. FILE I/O ----
+
+• fullfile(base_dir, 'analysis_conclusion.txt')
+  Builds a full path by joining folder and filename (works on Windows and Mac/Linux).
+
+• fid = fopen(path, 'w')
+  Opens a file for writing ('w'). fid is a file identifier. 'w' overwrites the file.
+
+• fprintf(fid, '%s', full_report)
+  Writes the string full_report to the file. %s means string.
+
+• fclose(fid)
+  Closes the file when done. Always close files to avoid corruption or locked files.
+
+
+---- 15. UTILITY FUNCTIONS USED IN THIS PROJECT ----
+
+• exist('fcdf', 'file')
+  Checks if a function or file named 'fcdf' exists (e.g. from Statistics and Machine Learning Toolbox). We use it to avoid errors if the toolbox isn’t installed: if exist('fcdf','file'), p_eta = 1 - fcdf(...); end.
+
+• isnan(x)
+  True if x is "not a number" (e.g. from 0/0). Used to replace NaN with a safe value for reporting (e.g. p_eta_str = '<0.001').
+
+• repelem((1:4)', n_rep)
+  Repeats each element of (1:4)' exactly n_rep times. So we get [1,1,...,1, 2,2,...,2, ...] for ANOVA group labels (which system each replicate belongs to).
+
+• arrayfun(@(i) sprintf(...), 1:4, 'UniformOutput', false)
+  Applies a function to each element 1:4 and returns a cell array of strings. Used to build the "ranking" line (e.g. "System A (90%) > System B (60%) > ...").
+
+• mfilename('fullpath')
+  Returns the full path of the current .m file. We use it to get the project folder: base_dir = fileparts(mfilename('fullpath')).
+
+• tic;  ...  toc;
+  tic starts a timer; toc stops it and prints elapsed time. Used to report how long the simulation took.
+
+
+---- 16. SHORT SYNTAX REFERENCE ----
+
+  A(i,:)     row i of matrix A
+  A(:,j)     column j of A
+  A(end)     last element
+  x:y        range from x to y (step 1)
+  x:s:y      range from x to y with step s
+  [a b]      horizontal concatenation
+  [a; b]     vertical concatenation
+  .*  ./  .^  element-wise ops
+  ~   logical NOT
+  { }  cell array index
+  '   transpose (real) or string delimiter
+  @(x) ...   anonymous function of x
+
+
+================================================================================
+If a judge asks "What does [specific function] do?", you can look it up here and
+give a one-sentence explanation (e.g. "trapz integrates power over time to get
+energy," "linspace creates our time vector with 250 evenly spaced points").
+================================================================================

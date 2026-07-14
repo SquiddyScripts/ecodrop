@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gravity Battery Lab — Interactive Demonstrations</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/site-nav.css" />
+    <link rel="stylesheet" href="/src/hub.css" />
+  </head>
+  <body>
+    <div class="hub-bg" aria-hidden="true"></div>
+
+    <nav class="site-nav" aria-label="Systems">
+      <a class="site-nav__brand" href="/">Gravity Battery Lab</a>
+      <div class="site-nav__links">
+        <a href="/buoyancy.html">Buoyancy</a>
+        <a href="/halbach.html">Halbach</a>
+        <a href="/elevator-dual.html">Dual-Weight</a>
+        <a href="/elevator-variable.html">Variable CW</a>
+      </div>
+    </nav>
+
+    <main class="hub">
+      <header class="hub-hero">
+        <p class="eyebrow">EcoDrop · Gravitational Energy Storage</p>
+        <h1>Four ways to store energy in gravity</h1>
+        <p>
+          Interactive 3D demonstrations of buoyancy-assisted, electromagnetic Halbach, and elevator
+          regeneration systems — built for judges, investors, and engineering review.
+        </p>
+        <p class="team">Amaan · Aiman · Kavin</p>
+      </header>
+
+      <div class="hub-grid">
+        <a class="system-card system-card--buoyancy" href="/buoyancy.html">
+          <span class="card-num">System 01</span>
+          <h2>Buoyancy Gravity Battery</h2>
+          <p>
+            Water-assisted lift in a sealed chamber. Buoyancy reduces motor load on the way up; the
+            weight drops through a generator on discharge. Full piping and animated water surfaces.
+          </p>
+          <div class="card-tags">
+            <span>3-phase cycle</span>
+            <span>Water shader</span>
+            <span>Auto-play</span>
+          </div>
+          <span class="card-cta">Open demonstration →</span>
+        </a>
+
+        <a class="system-card system-card--halbach" href="/halbach.html">
+          <span class="card-num">System 02</span>
+          <h2>Halbach Electromagnetic Storage</h2>
+          <p>
+            Four tubular linear motors with Halbach magnet arrays thrust the mass upward. Hoist maintains
+            cable tension; regeneration on gravity descent. Live flux and FEM telemetry.
+          </p>
+          <div class="card-tags">
+            <span>4× TLM</span>
+            <span>Live charts</span>
+            <span>Flux vectors</span>
+          </div>
+          <span class="card-cta">Open demonstration →</span>
+        </a>
+
+        <a class="system-card system-card--dual" href="/elevator-dual.html">
+          <span class="card-num">System 03</span>
+          <h2>Dual-Weight Regeneration Elevator</h2>
+          <p>
+            Real gearbox geometry on dual hoist drums. Car-side and counterweight masses drive bevel
+            gear trains and generators during travel — continuous energy recovery.
+          </p>
+          <div class="card-tags">
+            <span>CAD gearbox</span>
+            <span>Mechanism view</span>
+            <span>Auto-orbit</span>
+          </div>
+          <span class="card-cta">Open demonstration →</span>
+        </a>
+
+        <a class="system-card system-card--variable" href="/elevator-variable.html">
+          <span class="card-num">System 04</span>
+          <h2>Variable Counterweight System</h2>
+          <p>
+            Rotary discharge station deploys modular barbell masses onto the counterweight stack as
+            passenger load changes — adaptive balance with energy capture on each drop.
+          </p>
+          <div class="card-tags">
+            <span>Rotary station</span>
+            <span>Barbell drop</span>
+            <span>Load matching</span>
+          </div>
+          <span class="card-cta">Open demonstration →</span>
+        </a>
+      </div>
+
+      <footer class="hub-footer">
+        <p>Run locally with <code>npm run dev</code> · Three.js interactive visualizations</p>
+      </footer>
+    </main>
+  </body>
+</html>
